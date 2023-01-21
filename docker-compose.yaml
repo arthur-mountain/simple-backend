@@ -1,0 +1,70 @@
+version: '3.8'
+
+x-common:
+  &common
+  networks:
+    - backend-network
+  restart: unless-stopped
+  stdin_open: true
+  tty: true
+
+services:
+  my-app:
+    image: cosmtrek/air
+    container_name: my-app
+    working_dir: /app
+    ports:
+      - ${BACKEND_PORT}:${BACKEND_PORT}
+    environment:
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_NETWORK: ${MYSQL_NETWORK}
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_PORT: ${MYSQL_PORT}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      BACKEND_PORT: ${BACKEND_PORT}
+      SECRET: ${SECRET}
+      TEST_USER_NAME: ${TEST_USER_NAME}
+      TEST_USER_PASSWORD: ${TEST_USER_PASSWORD}
+    volumes:
+      - .:/app
+    depends_on:
+      - mysql
+      # - redis
+      # - rebbit
+    <<: *common
+
+  mysql:
+    image: mysql
+    container_name: my-mysql
+    ports:
+      - ${MYSQL_PORT}:${MYSQL_PORT}
+    volumes:
+      - ./migration/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    <<: *common
+
+  redis:
+    image: redis
+    container_name: my-redis
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
+    <<: *common
+
+  # rebbit:
+  #   image: rabbitmq:management
+  #   container_name: my-rebbitmq
+  #   ports:
+  #     - ${REBBIT_PORT}:${REBBIT_PORT}
+  #     - ${REBBIT_ADMIN_PORT}:${REBBIT_ADMIN_PORT}
+  #   environment:
+  #     RABBITMQ_DEFAULT_USER: ${RABBIT_DEFAULT_USER}
+  #     RABBITMQ_DEFAULT_PASS: ${RABBIT_DEFAULT_PASS}
+  #   <<: *common
+
+networks:
+  backend-network:
