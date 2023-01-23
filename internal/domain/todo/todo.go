@@ -9,11 +9,14 @@ import (
 
 // Database struct
 type TodoTable struct {
-	gorm.Model
-	Title       string     `gorm:"column:title;type:char(10);not null;" json:"title" form:"title" binding:"required"`
-	Description string     `gorm:"column:description;type:mediumtext;" json:"description" form:"description"`
-	IsCompleted uint       `gorm:"column:is_completed;type:tinyint(3);default:0" json:"is_completed" form:"is_completed" binding:"oneof=1 0"`
-	CompletedAt *time.Time `gorm:"column:completed_at;type:datetime;default:null" json:"completed_at,omitempty"`
+	Id          uint           `gorm:"column:id;primaryKey" json:"id" form:"id"`
+	CreatedAt   time.Time      `gorm:"column:created_at;" json:"created_at" form:"created_at"`
+	UpdatedAt   time.Time      `gorm:"column:updated_at;" json:"updated_at" form:"updated_at"`
+	DeletedAt   gorm.DeletedAt `gorm:"column:deleted_at;" json:"deleted_at" form:"deleted_at"`
+	Title       string         `gorm:"column:title;type:char(10);not null;" json:"title" form:"title" binding:"required"`
+	Description string         `gorm:"column:description;type:mediumtext;" json:"description" form:"description"`
+	IsCompleted uint           `gorm:"column:is_completed;type:tinyint(3);default:0" json:"is_completed" form:"is_completed" binding:"oneof=1 0"`
+	CompletedAt *time.Time     `gorm:"column:completed_at;type:datetime;default:null" json:"completed_at,omitempty"`
 }
 
 // query string for search

@@ -37,7 +37,7 @@ func (t *todoRepo) GetAllTodo(field *model.TodoQueries) (*int64, []*model.TodoTa
 	}
 
 	if field.OrderBy != nil {
-		query.Order(*field.OrderBy)
+		query.Order("created_at " + *field.OrderBy)
 	}
 
 	if field.CurrentPage < 1 {
@@ -48,7 +48,6 @@ func (t *todoRepo) GetAllTodo(field *model.TodoQueries) (*int64, []*model.TodoTa
 		field.PerPage = 15
 	}
 
-	// fmt.Printf("repo field: %+v", *field)
 	result := query.Count(&totalCount).Offset(int((field.CurrentPage - 1) * field.PerPage)).Limit(int(field.PerPage)).Find(&allTodo)
 
 	if result.Error != nil {
