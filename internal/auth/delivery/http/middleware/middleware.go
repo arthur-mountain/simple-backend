@@ -29,7 +29,12 @@ func IsTokenValid(c *gin.Context) {
 	})
 
 	if _, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		c.Next()
+		if uid, ok := token.Claims.(jwt.MapClaims)["uid"]; ok {
+			c.Set("uid", uid)
+			c.Next()
+		} else {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "Empty uid"})
+		}
 	} else {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 	}

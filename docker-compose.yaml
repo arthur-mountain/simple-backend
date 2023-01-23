@@ -30,7 +30,7 @@ services:
       - .:/app
     depends_on:
       - mysql
-      # - redis
+      - redis
       # - rebbit
     <<: *common
 

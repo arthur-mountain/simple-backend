@@ -12,6 +12,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -24,7 +25,9 @@ func AuthHandler(server *gin.RouterGroup, DB *gorm.DB) {
 		service: authService.Init(DB),
 	}
 
-	migrateUser(DB)
+	if !DB.Migrator().HasTable(&model.AuthTable{}) {
+		migrateUser(DB)
+	}
 
 	server.POST("/login", controller.LoginHandler)
 }
@@ -43,7 +46,10 @@ func (a *authController) LoginHandler(c *gin.Context) {
 		return
 	}
 
-	token, err := authUtils.GenerateToken(user.Name)
+	token, err := authUtils.GenerateToken(map[string]interface{}{
+		"uid":      user.IdentityId,
+		"userName": user.Name,
+	})
 	if err != nil {
 		response.MakeErrorResponse(c, http.StatusInternalServerError, err)
 		return
@@ -53,10 +59,6 @@ func (a *authController) LoginHandler(c *gin.Context) {
 }
 
 func migrateUser(DB *gorm.DB) {
-	if DB.Migrator().HasTable(&model.AuthTable{}) {
-		return
-	}
-
 	DB.AutoMigrate(&model.AuthTable{})
 
 	pwdHashed := authUtils.GetPasswordHashed(os.Getenv("TEST_USER_PASSWORD"))
@@ -64,6 +66,7 @@ func migrateUser(DB *gorm.DB) {
 	var user = &model.AuthTable{}
 	user.Name = os.Getenv("TEST_USER_NAME")
 	user.Password = pwdHashed
+	user.IdentityId = uuid.New().String()
 
 	if err := DB.Create(user).Error; err != nil {
 		log.Fatalln("Creat test user failed", err.Error())

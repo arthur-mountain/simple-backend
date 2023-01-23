@@ -47,6 +47,7 @@ func (t *todoController) getAllTodo(c *gin.Context) {
 		return
 	}
 
+	field.UserId = c.Keys["uid"].(string)
 	totalCount, allTodo, err := t.service.GetAllTodo(field)
 
 	if err != nil {
@@ -85,6 +86,7 @@ func (t *todoController) createTodo(c *gin.Context) {
 		return
 	}
 
+	body.UserId = c.Keys["uid"].(string)
 	err = t.service.CreateTodo(body)
 
 	if err != nil {
