@@ -1,6 +1,7 @@
 package http
 
 import (
+	"encoding/json"
 	"errors"
 	"log"
 	"os"
@@ -103,13 +104,24 @@ func (a *authController) UpdateHandler(c *gin.Context) {
 
 // Forgot Password
 func (a *authController) ForgotPasswordHandler(c *gin.Context) {
-	var body model.AuthBody
-	if err := c.BindJSON(&body); err != nil {
-		response.MakeErrorResponse(c, http.StatusBadRequest, err)
+	data, err := c.GetRawData()
+	if err != nil {
+		response.MakeErrorResponse(c, http.StatusInternalServerError, err)
 		return
 	}
 
-	err := a.service.ForgotPassword(&body)
+	var jsonData map[string]interface{}
+	err = json.Unmarshal(data, &jsonData)
+
+	if err != nil {
+		response.MakeErrorResponse(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	err = a.service.ForgotPassword(&model.AuthBody{
+		Name: jsonData["name"].(string),
+	})
+
 	if err != nil {
 		response.MakeErrorResponse(c, http.StatusNotFound, err)
 		return

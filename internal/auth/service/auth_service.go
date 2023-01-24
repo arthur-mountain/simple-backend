@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	repo "simple-backend/internal/auth/repository/mysql"
 	model "simple-backend/internal/domain/auth"
 	authUtils "simple-backend/internal/utils/auth"
@@ -24,6 +25,12 @@ func (a *authService) GetUser(input *model.AuthBody) (*model.AuthTable, error) {
 		Password: input.Password,
 	})
 
+	isPassed := authUtils.IsPasswordPassed(user.Password, input.Password)
+
+	if !isPassed {
+		return nil, errors.New("password is not correct")
+	}
+
 	return user, err
 }
 
@@ -46,10 +53,7 @@ func (a *authService) UpdateUser(input *model.AuthBody) error {
 }
 
 func (a *authService) ForgotPassword(input *model.AuthBody) error {
-	_, err := a.Repository.GetUser(&model.AuthTable{
-		Name:     input.Name,
-		Password: input.Password,
-	})
+	_, err := a.Repository.GetUser(&model.AuthTable{Name: input.Name})
 
 	if err != nil {
 		return err
