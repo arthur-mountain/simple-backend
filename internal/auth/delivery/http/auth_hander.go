@@ -26,7 +26,7 @@ func AuthHandler(server *gin.RouterGroup, DB *gorm.DB) {
 		service: authService.Init(DB),
 	}
 
-	if !DB.Migrator().HasTable(&model.AuthTable{}) {
+	if !DB.Migrator().HasTable(&model.UserTable{}) {
 		migrateUser(DB)
 	}
 
@@ -38,7 +38,7 @@ func AuthHandler(server *gin.RouterGroup, DB *gorm.DB) {
 
 // Login
 func (a *authController) LoginHandler(c *gin.Context) {
-	var body model.AuthBody
+	var body model.UserBody
 
 	if err := c.BindJSON(&body); err != nil {
 		response.MakeErrorResponse(c, http.StatusUnprocessableEntity, err)
@@ -65,7 +65,7 @@ func (a *authController) LoginHandler(c *gin.Context) {
 
 // Create User
 func (a *authController) CreateHandler(c *gin.Context) {
-	var body model.AuthBody
+	var body model.UserBody
 	if err := c.BindJSON(&body); err != nil {
 		response.MakeErrorResponse(c, http.StatusBadRequest, err)
 		return
@@ -87,7 +87,7 @@ func (a *authController) CreateHandler(c *gin.Context) {
 
 // Update User
 func (a *authController) UpdateHandler(c *gin.Context) {
-	var body model.AuthBody
+	var body model.UserBody
 	if err := c.BindJSON(&body); err != nil {
 		response.MakeErrorResponse(c, http.StatusBadRequest, err)
 		return
@@ -118,7 +118,7 @@ func (a *authController) ForgotPasswordHandler(c *gin.Context) {
 		return
 	}
 
-	err = a.service.ForgotPassword(&model.AuthBody{
+	err = a.service.ForgotPassword(&model.UserBody{
 		Name: jsonData["name"].(string),
 	})
 
@@ -131,11 +131,11 @@ func (a *authController) ForgotPasswordHandler(c *gin.Context) {
 }
 
 func migrateUser(DB *gorm.DB) {
-	DB.AutoMigrate(&model.AuthTable{})
+	DB.AutoMigrate(&model.UserTable{})
 
 	pwdHashed := authUtils.GetPasswordHashed(os.Getenv("TEST_USER_PASSWORD"))
 
-	var user = &model.AuthTable{}
+	var user = &model.UserTable{}
 	user.Name = os.Getenv("TEST_USER_NAME")
 	user.Password = pwdHashed
 

@@ -19,7 +19,7 @@ type TodoTable struct {
 	IsCompleted uint                `gorm:"column:is_completed;type:tinyint(3);default:0" json:"is_completed" form:"is_completed" binding:"oneof=1 0"`
 	CompletedAt *time.Time          `gorm:"column:completed_at;type:datetime;default:null" json:"completed_at,omitempty"`
 	UserId      string              `gorm:"column:user_id;type:varchar(255);not null;" json:"-"`
-	AuthModel   authModel.AuthTable `gorm:"foreignKey:UserId;references:IdentityId" json:"-"`
+	AuthModel   authModel.UserTable `gorm:"foreignKey:UserId;references:IdentityId" json:"-"`
 }
 
 // query string for search

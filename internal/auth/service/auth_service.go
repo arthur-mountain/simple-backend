@@ -19,8 +19,8 @@ func Init(db *gorm.DB) model.AuthServiceInterface {
 	}
 }
 
-func (a *authService) GetUser(input *model.AuthBody) (*model.AuthTable, error) {
-	user, err := a.Repository.GetUser(&model.AuthTable{
+func (a *authService) GetUser(input *model.UserBody) (*model.UserTable, error) {
+	user, err := a.Repository.GetUser(&model.UserTable{
 		Name:     input.Name,
 		Password: input.Password,
 	})
@@ -34,8 +34,8 @@ func (a *authService) GetUser(input *model.AuthBody) (*model.AuthTable, error) {
 	return user, err
 }
 
-func (a *authService) CreateUser(input *model.AuthBody) (*model.AuthTable, error) {
-	user, err := a.Repository.CreateUser(&model.AuthTable{
+func (a *authService) CreateUser(input *model.UserBody) (*model.UserTable, error) {
+	user, err := a.Repository.CreateUser(&model.UserTable{
 		Name:     input.Name,
 		Password: authUtils.GetPasswordHashed(input.Password),
 	})
@@ -43,8 +43,8 @@ func (a *authService) CreateUser(input *model.AuthBody) (*model.AuthTable, error
 	return user, err
 }
 
-func (a *authService) UpdateUser(input *model.AuthBody) error {
-	err := a.Repository.UpdateUser(&model.AuthTable{
+func (a *authService) UpdateUser(input *model.UserBody) error {
+	err := a.Repository.UpdateUser(&model.UserTable{
 		Name:     input.Name,
 		Password: authUtils.GetPasswordHashed(input.Password),
 	})
@@ -52,8 +52,8 @@ func (a *authService) UpdateUser(input *model.AuthBody) error {
 	return err
 }
 
-func (a *authService) ForgotPassword(input *model.AuthBody) error {
-	_, err := a.Repository.GetUser(&model.AuthTable{Name: input.Name})
+func (a *authService) ForgotPassword(input *model.UserBody) error {
+	_, err := a.Repository.GetUser(&model.UserTable{Name: input.Name})
 
 	if err != nil {
 		return err
