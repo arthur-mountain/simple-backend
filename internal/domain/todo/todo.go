@@ -3,23 +3,20 @@ package domain
 import (
 	authModel "simple-backend/internal/domain/auth"
 	"simple-backend/internal/interactor/page"
+	"simple-backend/internal/interactor/special"
 	"time"
-
-	"gorm.io/gorm"
 )
 
+// TodoTable "belongs to" UserTable
 // Database struct
 type TodoTable struct {
-	Id          uint                `gorm:"column:id;primaryKey" json:"id" form:"id"`
-	CreatedAt   time.Time           `gorm:"column:created_at;" json:"created_at" form:"created_at"`
-	UpdatedAt   time.Time           `gorm:"column:updated_at;" json:"updated_at" form:"updated_at"`
-	DeletedAt   gorm.DeletedAt      `gorm:"column:deleted_at;" json:"deleted_at" form:"deleted_at"`
+	special.Base
 	Title       string              `gorm:"column:title;type:char(10);not null;" json:"title" form:"title" binding:"required"`
 	Description string              `gorm:"column:description;type:mediumtext;" json:"description" form:"description"`
 	IsCompleted uint                `gorm:"column:is_completed;type:tinyint(3);default:0" json:"is_completed" form:"is_completed" binding:"oneof=1 0"`
 	CompletedAt *time.Time          `gorm:"column:completed_at;type:datetime;default:null" json:"completed_at,omitempty"`
 	UserId      string              `gorm:"column:user_id;type:varchar(255);not null;" json:"-"`
-	AuthModel   authModel.UserTable `gorm:"foreignKey:UserId;references:IdentityId" json:"-"`
+	User        authModel.UserTable `gorm:"foreignKey:UserId;references:IdentityId" json:"-"`
 }
 
 // query string for search
@@ -39,7 +36,7 @@ type TodoQueries struct {
 
 type TodoRepoInterface interface {
 	GetAllTodo(field *TodoQueries) (*int64, []*TodoTable, error)
-	GetTodo(id int) (*TodoTable, error)
+	GetTodo(todo *TodoTable) (*TodoTable, error)
 	CreateTodo(todo *TodoTable) error
 	UpdateTodo(id int, newTodo *TodoTable) (*TodoTable, error)
 	UpdateTodoCompleted(id int) (*int64, error)
@@ -48,7 +45,7 @@ type TodoRepoInterface interface {
 
 type TodoServiceInterface interface {
 	GetAllTodo(field *TodoQueries) (*int64, []*TodoTable, error)
-	GetTodo(id int) (*TodoTable, error)
+	GetTodo(todo *TodoTable) (*TodoTable, error)
 	CreateTodo(input *TodoTable) error
 	UpdateTodo(id int, newTodo *TodoTable) (*TodoTable, error)
 	UpdateTodoCompleted(id int) (*int64, error)

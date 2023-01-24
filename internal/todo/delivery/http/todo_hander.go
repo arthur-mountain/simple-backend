@@ -67,7 +67,10 @@ func (t *todoController) getTodo(c *gin.Context) {
 		return
 	}
 
-	todo, err := t.service.GetTodo(id)
+	todo := &model.TodoTable{}
+	todo.Id = uint(id)
+	todo.UserId = c.Keys["uid"].(string)
+	todo, err = t.service.GetTodo(todo)
 
 	if err != nil {
 		response.MakeErrorResponse(c, http.StatusNotFound, err)
@@ -130,7 +133,10 @@ func (t *todoController) updateTodoCompleted(c *gin.Context) {
 		return
 	}
 
-	updatedTodo, err := t.service.GetTodo(id)
+	updatedTodo := &model.TodoTable{}
+	updatedTodo.Id = uint(id)
+	updatedTodo.UserId = c.Keys["uid"].(string)
+	updatedTodo, err = t.service.GetTodo(updatedTodo)
 	if err != nil {
 		response.MakeErrorResponse(c, http.StatusBadRequest, err)
 		return

@@ -57,10 +57,8 @@ func (t *todoRepo) GetAllTodo(field *model.TodoQueries) (*int64, []*model.TodoTa
 	return &totalCount, allTodo, nil
 }
 
-func (t *todoRepo) GetTodo(id int) (*model.TodoTable, error) {
-	var todo *model.TodoTable
-
-	result := t.db.Model(&model.TodoTable{}).First(&todo, id)
+func (t *todoRepo) GetTodo(todo *model.TodoTable) (*model.TodoTable, error) {
+	result := t.db.Model(&model.TodoTable{}).Where("user_id = ?", todo.UserId).First(&todo, todo.Id)
 	if result.Error != nil {
 		return nil, result.Error
 	}

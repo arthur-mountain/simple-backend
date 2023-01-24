@@ -23,8 +23,8 @@ func (t *todoService) GetAllTodo(field *model.TodoQueries) (*int64, []*model.Tod
 	return totalCount, allTodo, err
 }
 
-func (t *todoService) GetTodo(id int) (*model.TodoTable, error) {
-	todo, err := t.Repository.GetTodo(id)
+func (t *todoService) GetTodo(todo *model.TodoTable) (*model.TodoTable, error) {
+	todo, err := t.Repository.GetTodo(todo)
 
 	return todo, err
 }
