@@ -41,14 +41,14 @@ func (t *todoService) UpdateTodo(id int, newTodo *model.TodoTable) (*model.TodoT
 	return updatedTodo, err
 }
 
-func (t *todoService) UpdateTodoCompleted(id int) (*int64, error) {
-	isSuccess, err := t.Repository.UpdateTodoCompleted(id)
+func (t *todoService) UpdateTodoCompleted(updatedTodo *model.TodoTable) (*int64, error) {
+	isSuccess, err := t.Repository.UpdateTodoCompleted(updatedTodo)
 
 	return isSuccess, err
 }
 
-func (t *todoService) DeleteTodo(id int) (*model.TodoTable, error) {
-	deletedTodo, err := t.Repository.DeleteTodo(id)
+func (t *todoService) DeleteTodo(deletedTodo *model.TodoTable) (*model.TodoTable, error) {
+	deletedTodo, err := t.Repository.DeleteTodo(deletedTodo)
 
 	return deletedTodo, err
 }

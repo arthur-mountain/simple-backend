@@ -77,7 +77,7 @@ func (t *todoRepo) CreateTodo(todo *model.TodoTable) error {
 }
 
 func (t *todoRepo) UpdateTodo(id int, newTodo *model.TodoTable) (*model.TodoTable, error) {
-	query := t.db.Model(&model.TodoTable{})
+	query := t.db.Model(&model.TodoTable{}).Where("user_id = ?", newTodo.UserId)
 	updatedTodo := &model.TodoTable{}
 
 	result := query.First(&updatedTodo, id)
@@ -97,26 +97,28 @@ func (t *todoRepo) UpdateTodo(id int, newTodo *model.TodoTable) (*model.TodoTabl
 	return updatedTodo, nil
 }
 
-func (t *todoRepo) UpdateTodoCompleted(id int) (*int64, error) {
-	var updatedTodo model.TodoTable
-	query := t.db.Model(&model.TodoTable{})
+func (t *todoRepo) UpdateTodoCompleted(updatedTodo *model.TodoTable) (*int64, error) {
+	query := t.db.Model(&model.TodoTable{}).Where("user_id = ?", updatedTodo.UserId)
 
-	result := query.First(&updatedTodo, id).Update("is_completed", 1)
+	result := query.First(&updatedTodo).Update("is_completed", 1)
 	if result.Error != nil {
 		return nil, result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return nil, gorm.ErrRecordNotFound
 	}
 
 	return &result.RowsAffected, nil
 }
 
-func (t *todoRepo) DeleteTodo(id int) (*model.TodoTable, error) {
-	var todo *model.TodoTable
-	query := t.db.Model(&model.TodoTable{})
+func (t *todoRepo) DeleteTodo(deletedTodo *model.TodoTable) (*model.TodoTable, error) {
+	query := t.db.Model(&model.TodoTable{}).Where("user_id = ?", deletedTodo.UserId)
 
-	result := query.First(&todo, id).Delete(&todo)
+	result := query.First(&deletedTodo).Delete(&deletedTodo)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
-	return todo, nil
+	return deletedTodo, nil
 }

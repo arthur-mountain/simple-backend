@@ -8,6 +8,7 @@ import (
 )
 
 // TodoTable "belongs to" UserTable
+// UserTable "Has many" TodoTable
 // Database struct
 type TodoTable struct {
 	special.Base
@@ -39,8 +40,8 @@ type TodoRepoInterface interface {
 	GetTodo(todo *TodoTable) (*TodoTable, error)
 	CreateTodo(todo *TodoTable) error
 	UpdateTodo(id int, newTodo *TodoTable) (*TodoTable, error)
-	UpdateTodoCompleted(id int) (*int64, error)
-	DeleteTodo(id int) (*TodoTable, error)
+	UpdateTodoCompleted(updatedTodo *TodoTable) (*int64, error)
+	DeleteTodo(updatedTodo *TodoTable) (*TodoTable, error)
 }
 
 type TodoServiceInterface interface {
@@ -48,8 +49,8 @@ type TodoServiceInterface interface {
 	GetTodo(todo *TodoTable) (*TodoTable, error)
 	CreateTodo(input *TodoTable) error
 	UpdateTodo(id int, newTodo *TodoTable) (*TodoTable, error)
-	UpdateTodoCompleted(id int) (*int64, error)
-	DeleteTodo(id int) (*TodoTable, error)
+	UpdateTodoCompleted(updatedTodo *TodoTable) (*int64, error)
+	DeleteTodo(updatedTodo *TodoTable) (*TodoTable, error)
 }
 
 func (t *TodoTable) TableName() string {

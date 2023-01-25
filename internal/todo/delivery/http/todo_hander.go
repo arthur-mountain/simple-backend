@@ -116,6 +116,7 @@ func (t *todoController) updateTodo(c *gin.Context) {
 		return
 	}
 
+	newTodo.UserId = c.Keys["uid"].(string)
 	newTodo, err = t.service.UpdateTodo(id, newTodo)
 
 	if err != nil {
@@ -147,7 +148,7 @@ func (t *todoController) updateTodoCompleted(c *gin.Context) {
 		return
 	}
 
-	isSuccess, err := t.service.UpdateTodoCompleted(id)
+	isSuccess, err := t.service.UpdateTodoCompleted(updatedTodo)
 
 	if err != nil {
 		response.MakeErrorResponse(c, http.StatusUnprocessableEntity, err)
@@ -165,7 +166,10 @@ func (t *todoController) deleteTodo(c *gin.Context) {
 		return
 	}
 
-	deletedTodo, err := t.service.DeleteTodo(id)
+	deletedTodo := &model.TodoTable{}
+	deletedTodo.Id = uint(id)
+	deletedTodo.UserId = c.Keys["uid"].(string)
+	deletedTodo, err = t.service.DeleteTodo(deletedTodo)
 
 	if err != nil {
 		response.MakeErrorResponse(c, http.StatusUnprocessableEntity, err)
