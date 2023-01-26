@@ -127,7 +127,7 @@ func (a *authController) ForgotPasswordHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusAccepted, response.MakeCommonResponse("please check your email", http.StatusAccepted))
+	c.JSON(http.StatusAccepted, response.MakeCommonResponse(os.Getenv("RESET_PASSWORD_URI"), http.StatusAccepted))
 }
 
 func migrateUser(DB *gorm.DB) {

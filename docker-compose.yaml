@@ -16,16 +16,23 @@ services:
     ports:
       - ${BACKEND_PORT}:${BACKEND_PORT}
     environment:
+      # backend
+      SECRET: ${SECRET}
+      BACKEND_PORT: ${BACKEND_PORT}
+      RESET_PASSWORD_URI: ${RESET_PASSWORD_URI}
+      # mysql
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_NETWORK: ${MYSQL_NETWORK}
       MYSQL_HOST: ${MYSQL_HOST}
       MYSQL_PORT: ${MYSQL_PORT}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
-      BACKEND_PORT: ${BACKEND_PORT}
-      SECRET: ${SECRET}
+      # test user
       TEST_USER_NAME: ${TEST_USER_NAME}
       TEST_USER_PASSWORD: ${TEST_USER_PASSWORD}
+      # smtp
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
     volumes:
       - .:/app
     depends_on:

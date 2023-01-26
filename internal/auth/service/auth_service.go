@@ -59,7 +59,5 @@ func (a *authService) ForgotPassword(input *model.UserBody) error {
 		return err
 	}
 
-	// TODO: send reset password email
-
 	return nil
 }
