@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"strconv"
 
 	auth "simple-backend/internal/auth/delivery/http"
 	authMiddleware "simple-backend/internal/auth/delivery/http/middleware"
@@ -53,13 +55,26 @@ func main() {
 		return
 	}
 
+	redisCtx := context.Background()
+	redisDb, _ := strconv.Atoi(os.Getenv("REDIS_DB"))
+	redisConfig := connect.RedisConfig{
+		Addr:     os.Getenv("REDIS_HOST") + ":" + os.Getenv("REDIS_PORT"),
+		Password: "",
+		Db:       redisDb,
+	}
+	REDIS, err := redisConfig.NewClient(redisCtx)
+	if err != nil {
+		fmt.Println("redis init error", err.Error())
+		return
+	}
+
 	// Apply middleware
 	server.Use(cors.CorsMiddleware)
 	server.Use(statics.StaticsMiddleware)
 
 	serverV1 := server.Group("api/v1")
 	// Login
-	auth.AuthHandler(serverV1, DB)
+	auth.AuthHandler(serverV1, DB, REDIS, redisCtx)
 
 	// Auth middleware
 	serverV1.Use(authMiddleware.IsTokenValid)

@@ -47,6 +47,9 @@ type AuthRepoInterface interface {
 	UpdateUser(user *UserTable) error
 }
 
+type AuthCacheRepoInterface interface {
+}
+
 func (t *UserTable) TableName() string {
 	return "users"
 }

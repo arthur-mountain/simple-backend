@@ -4,7 +4,6 @@ import (
 	model "simple-backend/internal/domain/todo"
 
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 type todoRepo struct {
@@ -18,7 +17,8 @@ func Init(db *gorm.DB) model.TodoRepoInterface {
 func (t *todoRepo) GetAllTodo(field *model.TodoQueries) (*int64, []*model.TodoTable, error) {
 	var totalCount int64
 	allTodo := make([]*model.TodoTable, 0)
-	query := t.db.Model(&model.TodoTable{}).Preload(clause.Associations)
+	query := t.db.Model(&model.TodoTable{})
+	// query := t.db.Model(&model.TodoTable{}).Preload(clause.Associations)
 
 	if field.Title != nil {
 		query.Where("title = ?", field.Title)
