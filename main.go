@@ -11,7 +11,7 @@ import (
 	"simple-backend/internal/interactor/middleware/cors"
 	"simple-backend/internal/interactor/middleware/statics"
 	todo "simple-backend/internal/todo/delivery/http"
-	"simple-backend/internal/utils/connect"
+	"simple-backend/internal/utils/databases"
 
 	"github.com/gin-gonic/gin"
 )
@@ -38,6 +38,8 @@ import (
 
 func main() {
 	server := gin.Default()
+
+	// mysql init
 	url := fmt.Sprintf(
 		"%s:%s@%s(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		os.Getenv("MYSQL_USER"),
@@ -47,22 +49,22 @@ func main() {
 		os.Getenv("MYSQL_PORT"),
 		os.Getenv("MYSQL_DATABASE"),
 	)
-
-	mysqlConfig := connect.MysqlConfig{DNS: &url}
+	mysqlConfig := databases.MysqlConfig{DNS: &url}
 	DB, err := mysqlConfig.Connect()
 	if err != nil {
 		fmt.Println("init db error", err.Error())
 		return
 	}
 
-	redisCtx := context.Background()
-	redisDb, _ := strconv.Atoi(os.Getenv("REDIS_DB"))
-	redisConfig := connect.RedisConfig{
-		Addr:     os.Getenv("REDIS_HOST") + ":" + os.Getenv("REDIS_PORT"),
-		Password: "",
-		Db:       redisDb,
-	}
-	REDIS, err := redisConfig.NewClient(redisCtx)
+	// redis init
+	defaultRedisCtx := context.Background()
+	defaultRedisDb, _ := strconv.Atoi(os.Getenv("REDIS_DB"))
+	REDIS, err := databases.RedisInit(
+		os.Getenv("REDIS_HOST")+":"+os.Getenv("REDIS_PORT"),
+		"",
+		defaultRedisDb,
+		defaultRedisCtx,
+	)
 	if err != nil {
 		fmt.Println("redis init error", err.Error())
 		return
@@ -74,7 +76,7 @@ func main() {
 
 	serverV1 := server.Group("api/v1")
 	// Login
-	auth.AuthHandler(serverV1, DB, REDIS, redisCtx)
+	auth.AuthHandler(serverV1, DB, REDIS)
 
 	// Auth middleware
 	serverV1.Use(authMiddleware.IsTokenValid)

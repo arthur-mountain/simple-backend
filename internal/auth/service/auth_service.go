@@ -1,14 +1,13 @@
 package service
 
 import (
-	"context"
 	"errors"
 	repo "simple-backend/internal/auth/repository/mysql"
-	cache "simple-backend/internal/auth/repository/redis"
+	redisCache "simple-backend/internal/auth/repository/redis"
 	model "simple-backend/internal/domain/auth"
 	authUtils "simple-backend/internal/utils/auth"
+	"simple-backend/internal/utils/databases"
 
-	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -17,10 +16,10 @@ type authService struct {
 	Cache      model.AuthCacheRepoInterface
 }
 
-func Init(db *gorm.DB, redis *redis.Client, redisCtx context.Context) model.AuthServiceInterface {
+func Init(db *gorm.DB, redis *databases.MyRedis) model.AuthServiceInterface {
 	return &authService{
 		Repository: repo.Init(db),
-		Cache:      cache.Init(redis, redisCtx),
+		Cache:      redisCache.Init(redis),
 	}
 }
 

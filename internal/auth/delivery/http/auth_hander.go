@@ -1,7 +1,6 @@
 package http
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"log"
@@ -11,11 +10,11 @@ import (
 	response "simple-backend/internal/utils/response"
 
 	authUtils "simple-backend/internal/utils/auth"
+	"simple-backend/internal/utils/databases"
 
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -23,9 +22,9 @@ type authController struct {
 	service model.AuthServiceInterface
 }
 
-func AuthHandler(server *gin.RouterGroup, DB *gorm.DB, REDIS *redis.Client, redisCtx context.Context) {
+func AuthHandler(server *gin.RouterGroup, DB *gorm.DB, REDIS *databases.MyRedis) {
 	controller := &authController{
-		service: authService.Init(DB, REDIS, redisCtx),
+		service: authService.Init(DB, REDIS),
 	}
 
 	if !DB.Migrator().HasTable(&model.UserTable{}) {

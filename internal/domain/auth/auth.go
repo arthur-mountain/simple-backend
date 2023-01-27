@@ -48,6 +48,8 @@ type AuthRepoInterface interface {
 }
 
 type AuthCacheRepoInterface interface {
+	GetUser() (*UserTable, error)
+	SetUser(value interface{}) error
 }
 
 func (t *UserTable) TableName() string {
