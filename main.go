@@ -11,6 +11,7 @@ import (
 	"simple-backend/internal/interactor/middleware/cors"
 	"simple-backend/internal/interactor/middleware/statics"
 	todo "simple-backend/internal/todo/delivery/http"
+	user "simple-backend/internal/user/delivery/http"
 	"simple-backend/internal/utils/databases"
 
 	"github.com/gin-gonic/gin"
@@ -80,6 +81,8 @@ func main() {
 
 	// Auth middleware
 	serverV1.Use(authMiddleware.IsTokenValid)
+	// User
+	user.UserHandler(serverV1, DB, REDIS)
 	// Todo
 	todo.TodoHandler(serverV1, DB)
 

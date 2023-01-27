@@ -1,7 +1,7 @@
 package domain
 
 import (
-	authModel "simple-backend/internal/domain/auth"
+	userModel "simple-backend/internal/domain/user"
 	"simple-backend/internal/interactor/page"
 	"simple-backend/internal/interactor/special"
 	"time"
@@ -17,7 +17,7 @@ type TodoTable struct {
 	IsCompleted uint                `gorm:"column:is_completed;type:tinyint(3);default:0" json:"is_completed" form:"is_completed" binding:"oneof=1 0"`
 	CompletedAt *time.Time          `gorm:"column:completed_at;type:datetime;default:null" json:"completed_at,omitempty"`
 	UserId      string              `gorm:"column:user_id;type:varchar(255);not null;" json:"-"`
-	User        authModel.UserTable `gorm:"foreignKey:UserId;references:IdentityId" json:"-"`
+	User        userModel.UserTable `gorm:"foreignKey:UserId;references:IdentityId" json:"-"`
 }
 
 // query string for search
