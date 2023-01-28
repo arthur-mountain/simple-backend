@@ -45,7 +45,7 @@ func (a *userRepo) CreateUser(user *model.UserTable) (*model.UserTable, error) {
 }
 
 func (a *userRepo) UpdateUser(user *model.UserTable) error {
-	result := a.db.Model(&model.UserTable{}).Save(user)
+	result := a.db.Model(&model.UserTable{}).Where("id = ?", user.Id).Updates(user)
 
 	if result.Error != nil {
 		return result.Error
@@ -55,7 +55,7 @@ func (a *userRepo) UpdateUser(user *model.UserTable) error {
 }
 
 func (a *userRepo) DeleteUser(user *model.UserTable) error {
-	result := a.db.Model(&model.UserTable{}).Delete(&user)
+	result := a.db.Model(&model.UserTable{}).Delete(user)
 
 	if result.Error != nil {
 		return result.Error

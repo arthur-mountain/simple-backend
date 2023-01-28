@@ -4,9 +4,20 @@ import (
 	user "simple-backend/internal/domain/user"
 )
 
+type LoginBody struct {
+	Email    string `json:"email" form:"email" binding:"required,email"`
+	Password string `json:"password" form:"password" binding:"required"`
+}
+
+type ResetPasswordBody struct {
+	// VerifyCode      string `json:"verify_code" form:"verify_code" binding:"required"`
+	Password        string `json:"password" form:"password" binding:"required"`
+	ConfirmPassword string `json:"confirm_password" form:"confirm_password" binding:"required,eqfield=Password"`
+}
+
 type AuthServiceInterface interface {
-	Login(input *user.UserBody) (string, error)
-	ForgotPassword(input *user.UserBody) error
+	Login(input *LoginBody) (string, error)
+	ForgotPassword(input *LoginBody) error
 }
 
 type AuthRepoInterface interface {

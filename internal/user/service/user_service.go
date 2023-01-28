@@ -38,21 +38,27 @@ func (a *userService) GetUser(id uint) (*model.UserTable, error) {
 	return user, err
 }
 
-func (a *userService) CreateUser(input *model.UserBody) (*model.UserTable, error) {
+func (a *userService) CreateUser(input *model.UserCreate) (*model.UserTable, error) {
 	user, err := a.Repository.CreateUser(&model.UserTable{
 		Name:     input.Name,
+		Email:    input.Email,
 		Password: authUtils.GetPasswordHashed(input.Password),
 	})
 
 	return user, err
 }
 
-func (a *userService) UpdateUser(id uint, input *model.UserBody) error {
-	updatedUser := &model.UserTable{
-		Name:     input.Name,
-		Password: authUtils.GetPasswordHashed(input.Password),
-	}
+func (a *userService) UpdateUser(id uint, input *model.UserUpdate) error {
+	updatedUser := &model.UserTable{}
 	updatedUser.Id = id
+
+	if input.Name != "" {
+		updatedUser.Name = input.Name
+	}
+
+	if input.Email != "" {
+		updatedUser.Email = input.Email
+	}
 
 	err := a.Repository.UpdateUser(updatedUser)
 

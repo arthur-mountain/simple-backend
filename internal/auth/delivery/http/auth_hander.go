@@ -37,7 +37,7 @@ func AuthHandler(server *gin.RouterGroup, DB *gorm.DB, REDIS *databases.MyRedis)
 
 // Login
 func (a *authController) LoginHandler(c *gin.Context) {
-	var body userModel.UserBody
+	var body authModel.LoginBody
 
 	if err := c.BindJSON(&body); err != nil {
 		response.MakeErrorResponse(c, http.StatusUnprocessableEntity, err)
@@ -69,8 +69,8 @@ func (a *authController) ForgotPasswordHandler(c *gin.Context) {
 		return
 	}
 
-	err = a.service.ForgotPassword(&userModel.UserBody{
-		Name: jsonData["name"].(string),
+	err = a.service.ForgotPassword(&authModel.LoginBody{
+		Email: jsonData["email"].(string),
 	})
 
 	if err != nil {
@@ -78,19 +78,25 @@ func (a *authController) ForgotPasswordHandler(c *gin.Context) {
 		return
 	}
 
+	/*
+		TODO:
+		 1. return uri + token
+		 2. add api endpoint, verify token, add redis cache and expired, return verify_code
+		 3. reset password body struct should add verify_code
+	*/
 	c.JSON(http.StatusAccepted, response.MakeCommonResponse(os.Getenv("RESET_PASSWORD_URI"), http.StatusAccepted))
 }
 
 func migrateUser(DB *gorm.DB) {
 	DB.AutoMigrate(&userModel.UserTable{})
 
-	pwdHashed := authUtils.GetPasswordHashed(os.Getenv("TEST_USER_PASSWORD"))
-
-	var user = &userModel.UserTable{}
-	user.Name = os.Getenv("TEST_USER_NAME")
-	user.Password = pwdHashed
+	user := &userModel.UserTable{
+		Name:     os.Getenv("TEST_USER_NAME"),
+		Email:    os.Getenv("TEST_USER_EMAIL"),
+		Password: authUtils.GetPasswordHashed(os.Getenv("TEST_USER_PASSWORD")),
+	}
 
 	if err := DB.Create(user).Error; err != nil {
-		log.Fatalln("Creat test user failed", err.Error())
+		log.Fatalln("Creat test user failed", err)
 	}
 }

@@ -11,15 +11,30 @@ import (
 
 type UserTable struct {
 	special.Base
-	Name       string `gorm:"index;column:name;type:varchar(50);not null;" json:"name"`
+	IdentityId string `gorm:"uniqueIndex;column:identity_id;type:varchar(50);not null;" json:"identity_id"`
+	Name       string `gorm:"index;column:name;type:varchar(24);not null;" json:"name"`
+	Email      string `gorm:"uniqueIndex;column:email;type:varchar(64);not null;" json:"email"`
 	Password   string `gorm:"column:password;type:varchar(255);not null;" json:"-"`
-	IdentityId string `gorm:"uniqueIndex;column:identity_id;type:varchar(255);not null;" json:"-"`
 }
 
 type UserBody struct {
+	IdentityId      string `json:"identity_id" form:"identity_id"`
+	Name            string `json:"name" form:"name"`
+	Email           string `json:"email" form:"email" binding:"required,email"`
+	Password        string `json:"password" form:"password" `
+	ConfirmPassword string `json:"confirm_password" form:"confirm_password"`
+}
+
+type UserCreate struct {
 	Name            string `json:"name" form:"name" binding:"required"`
+	Email           string `json:"email" form:"email" binding:"required,email"`
 	Password        string `json:"password" form:"password" binding:"required"`
-	ConfirmPassword string `json:"confirm_password" form:"confirm_password" binding:"omitempty,eqfield=Password"`
+	ConfirmPassword string `json:"confirm_password" form:"confirm_password" binding:"required,eqfield=Password"`
+}
+
+type UserUpdate struct {
+	Name  string `json:"name" form:"name"`
+	Email string `json:"email" form:"email" binding:"omitempty,email"`
 }
 
 type UserQuery struct {
@@ -37,8 +52,8 @@ type UserQueries struct {
 type UserServiceInterface interface {
 	GetUsers() ([]*UserTable, error)
 	GetUser(id uint) (*UserTable, error)
-	CreateUser(input *UserBody) (*UserTable, error)
-	UpdateUser(id uint, input *UserBody) error
+	CreateUser(input *UserCreate) (*UserTable, error)
+	UpdateUser(id uint, input *UserUpdate) error
 	DeleteUser(id uint) error
 }
 

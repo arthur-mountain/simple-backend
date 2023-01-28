@@ -24,9 +24,9 @@ func Init(db *gorm.DB, redis *databases.MyRedis) authModel.AuthServiceInterface 
 	}
 }
 
-func (a *authService) Login(input *userModel.UserBody) (string, error) {
+func (a *authService) Login(input *authModel.LoginBody) (string, error) {
 	user, err := a.Repository.GetUser(&userModel.UserTable{
-		Name:     input.Name,
+		Email:    input.Email,
 		Password: input.Password,
 	})
 
@@ -52,8 +52,8 @@ func (a *authService) Login(input *userModel.UserBody) (string, error) {
 	return token, nil
 }
 
-func (a *authService) ForgotPassword(input *userModel.UserBody) error {
-	_, err := a.Repository.GetUser(&userModel.UserTable{Name: input.Name})
+func (a *authService) ForgotPassword(input *authModel.LoginBody) error {
+	_, err := a.Repository.GetUser(&userModel.UserTable{Email: input.Email})
 
 	if err != nil {
 		return err

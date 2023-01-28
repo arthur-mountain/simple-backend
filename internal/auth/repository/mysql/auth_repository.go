@@ -16,12 +16,10 @@ func Init(db *gorm.DB) authModel.AuthRepoInterface {
 }
 
 func (a *authRepo) GetUser(input *userModel.UserTable) (*userModel.UserTable, error) {
-	var user userModel.UserTable
-
-	result := a.db.Model(&userModel.UserTable{}).First(&user, "name = ?", input.Name)
+	result := a.db.Model(&userModel.UserTable{}).First(input, "email = ?", input.Email)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
-	return &user, nil
+	return input, nil
 }

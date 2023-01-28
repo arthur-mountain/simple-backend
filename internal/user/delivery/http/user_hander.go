@@ -1,7 +1,6 @@
 package http
 
 import (
-	"errors"
 	model "simple-backend/internal/domain/user"
 	userService "simple-backend/internal/user/service"
 	response "simple-backend/internal/utils/response"
@@ -66,16 +65,16 @@ func (a *userController) GetUser(c *gin.Context) {
 
 // Create User
 func (a *userController) CreateUser(c *gin.Context) {
-	var body model.UserBody
+	var body model.UserCreate
 	if err := c.BindJSON(&body); err != nil {
 		response.MakeErrorResponse(c, http.StatusBadRequest, err)
 		return
 	}
 
-	if body.Password != body.ConfirmPassword {
-		response.MakeErrorResponse(c, http.StatusBadRequest, errors.New("confirm_password doesn't match password"))
-		return
-	}
+	// if body.Password != body.ConfirmPassword {
+	// 	response.MakeErrorResponse(c, http.StatusBadRequest, errors.New("confirm_password doesn't match password"))
+	// 	return
+	// }
 
 	user, err := a.service.CreateUser(&body)
 	if err != nil {
@@ -89,7 +88,7 @@ func (a *userController) CreateUser(c *gin.Context) {
 // Update User
 func (a *userController) UpdateUser(c *gin.Context) {
 	var id int
-	var body model.UserBody
+	var body model.UserUpdate
 	var err error
 
 	if id, err = strconv.Atoi(c.Param("id")); err != nil {
