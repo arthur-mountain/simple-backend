@@ -9,18 +9,18 @@ import (
 )
 
 type Response struct {
-	StatusCode int    `json:"status_code"`
-	Message    string `json:"message"`
-	Items      any    `json:"items,omitempty"`
+	StatusCode int         `json:"status_code"`
+	Message    string      `json:"message"`
+	Items      interface{} `json:"items,omitempty"`
 }
 
 type PaginationItems struct {
-	Data any `json:"data"`
+	Data interface{} `json:"data"`
 	page.Pagination
 }
 
-func MakeCommonResponse(body any, code ...any) Response {
-	if code != nil {
+func MakeCommonResponse(body interface{}, code ...any) Response {
+	if len(code) > 0 {
 		return Response{
 			StatusCode: code[0].(int),
 			Message:    "success",
@@ -35,7 +35,7 @@ func MakeCommonResponse(body any, code ...any) Response {
 	}
 }
 
-func MakePaginationResponse(body any, pageInfo page.Pagination) Response {
+func MakePaginationResponse(body interface{}, pageInfo page.Pagination) Response {
 	items := &PaginationItems{Data: body}
 	items.CurrentPage = pageInfo.CurrentPage
 	items.PerPage = pageInfo.PerPage

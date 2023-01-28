@@ -50,7 +50,7 @@ func (a *authController) LoginHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response.MakeCommonResponse(struct{ token string }{token: token}))
+	c.JSON(http.StatusOK, response.MakeCommonResponse(map[string]interface{}{"token": token}))
 }
 
 // Forgot Password

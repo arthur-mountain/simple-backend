@@ -26,17 +26,17 @@ func TodoHandler(server *gin.RouterGroup, DB *gorm.DB) {
 	}
 
 	// Get All todo
-	server.GET("/todo", controller.getAllTodo)
+	server.GET("/todos", controller.getAllTodo)
 	// Get Single todo
-	server.GET("/todo/:id", controller.getTodo)
+	server.GET("/todos/:id", controller.getTodo)
 	// Create todo
-	server.POST("/todo/create", controller.createTodo)
+	server.POST("/todos/create", controller.createTodo)
 	// Update todo
-	server.PUT("/todo/:id", controller.updateTodo)
+	server.PUT("/todos/:id", controller.updateTodo)
 	// Update todo is completed
-	server.PUT("/todo/:id/completed", controller.updateTodoCompleted)
+	server.PUT("/todos/:id/completed", controller.updateTodoCompleted)
 	// Delete todo
-	server.DELETE("/todo/:id", controller.deleteTodo)
+	server.DELETE("/todos/:id", controller.deleteTodo)
 }
 
 func (t *todoController) getAllTodo(c *gin.Context) {
