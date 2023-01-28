@@ -125,5 +125,5 @@ func (a *userController) DeleteUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusAccepted, response.MakeCommonResponse("update success", http.StatusAccepted))
+	c.JSON(http.StatusAccepted, response.MakeCommonResponse("delete success", http.StatusAccepted))
 }

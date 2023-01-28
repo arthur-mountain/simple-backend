@@ -26,7 +26,7 @@ func (a *userRepo) GetUsers() ([]*model.UserTable, error) {
 }
 
 func (a *userRepo) GetUser(user *model.UserTable) (*model.UserTable, error) {
-	result := a.db.Model(&model.UserTable{}).First(&user, "name = ?", user.Name)
+	result := a.db.Model(&model.UserTable{}).First(user)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -45,10 +45,10 @@ func (a *userRepo) CreateUser(user *model.UserTable) (*model.UserTable, error) {
 }
 
 func (a *userRepo) UpdateUser(user *model.UserTable) error {
-	result := a.db.Model(&model.UserTable{}).Where("name = ?", user.Name).Update("password", user.Password)
+	result := a.db.Model(&model.UserTable{}).Save(user)
 
-	if result.RowsAffected == 0 {
-		return gorm.ErrRecordNotFound
+	if result.Error != nil {
+		return result.Error
 	}
 
 	return nil
