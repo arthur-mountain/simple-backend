@@ -25,4 +25,6 @@ type AuthRepoInterface interface {
 }
 
 type AuthCacheRepoInterface interface {
+	GetUser(dest interface{}) error
+	SetUser(value interface{}) error
 }

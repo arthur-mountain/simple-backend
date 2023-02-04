@@ -19,15 +19,15 @@ func InitWithCtx(rdb *databases.MyRedis, ctx *context.Context) model.UserCacheRe
 	return &userRedisCacheRepo{rdb: rdb, ctx: ctx}
 }
 
-func (a *userRedisCacheRepo) GetUser() (*model.UserTable, error) {
-	user, err := a.rdb.Get(a.ctx, "user")
+// func (a *userRedisCacheRepo) GetUser() (*model.UserTable, error) {
+// 	user, err := a.rdb.Get(a.ctx, "user")
 
-	if err != nil {
-		return nil, err
-	}
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	return user.(*model.UserTable), nil
-}
+// 	return user.(*model.UserTable), nil
+// }
 
 func (a *userRedisCacheRepo) SetUser(value interface{}) error {
 	err := a.rdb.Set(a.ctx, "user", value, 0)
