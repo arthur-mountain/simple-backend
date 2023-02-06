@@ -14,10 +14,14 @@ func Init(db *gorm.DB) model.UserRepoInterface {
 	return &userRepo{db: db}
 }
 
-func (a *userRepo) GetUsers() ([]*model.UserTable, error) {
+func (u *userRepo) WithTx(trx *gorm.DB) model.UserRepoInterface {
+	return &userRepo{db: trx}
+}
+
+func (u *userRepo) GetUsers() ([]*model.UserTable, error) {
 	users := make([]*model.UserTable, 0)
 
-	result := a.db.Model(&model.UserTable{}).Find(&users)
+	result := u.db.Model(&model.UserTable{}).Find(&users)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -25,8 +29,8 @@ func (a *userRepo) GetUsers() ([]*model.UserTable, error) {
 	return users, nil
 }
 
-func (a *userRepo) GetUser(user *model.UserTable) (*model.UserTable, error) {
-	result := a.db.Model(&model.UserTable{}).First(user)
+func (u *userRepo) GetUser(user *model.UserTable) (*model.UserTable, error) {
+	result := u.db.Model(&model.UserTable{}).First(user)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -34,8 +38,8 @@ func (a *userRepo) GetUser(user *model.UserTable) (*model.UserTable, error) {
 	return user, nil
 }
 
-func (a *userRepo) CreateUser(user *model.UserTable) (*model.UserTable, error) {
-	result := a.db.Model(&model.UserTable{}).Create(user)
+func (u *userRepo) CreateUser(user *model.UserTable) (*model.UserTable, error) {
+	result := u.db.Model(&model.UserTable{}).Create(user)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -44,8 +48,8 @@ func (a *userRepo) CreateUser(user *model.UserTable) (*model.UserTable, error) {
 	return user, nil
 }
 
-func (a *userRepo) UpdateUser(user *model.UserTable) error {
-	result := a.db.Model(&model.UserTable{}).Where("id = ?", user.Id).Updates(user)
+func (u *userRepo) UpdateUser(user *model.UserTable) error {
+	result := u.db.Model(&model.UserTable{}).Where("id = ?", user.Id).Updates(user)
 
 	if result.Error != nil {
 		return result.Error
@@ -54,8 +58,8 @@ func (a *userRepo) UpdateUser(user *model.UserTable) error {
 	return nil
 }
 
-func (a *userRepo) DeleteUser(user *model.UserTable) error {
-	result := a.db.Model(&model.UserTable{}).Delete(user)
+func (u *userRepo) DeleteUser(user *model.UserTable) error {
+	result := u.db.Model(&model.UserTable{}).Delete(user)
 
 	if result.Error != nil {
 		return result.Error
