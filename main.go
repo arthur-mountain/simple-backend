@@ -9,6 +9,7 @@ import (
 	auth "simple-backend/internal/auth/delivery/http"
 	authMiddleware "simple-backend/internal/auth/delivery/http/middleware"
 	"simple-backend/internal/interactor/middleware/cors"
+	"simple-backend/internal/interactor/middleware/logs"
 	"simple-backend/internal/interactor/middleware/statics"
 	todo "simple-backend/internal/todo/delivery/http"
 	user "simple-backend/internal/user/delivery/http"
@@ -74,6 +75,7 @@ func main() {
 	// Apply middleware
 	server.Use(cors.CorsMiddleware)
 	server.Use(statics.StaticsMiddleware)
+	server.Use(logs.LoggerToFile)
 
 	serverV1 := server.Group("api/v1")
 	// Login

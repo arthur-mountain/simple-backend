@@ -69,6 +69,7 @@ func (a *authController) ForgotPasswordHandler(c *gin.Context) {
 		return
 	}
 
+	// find user is exists
 	err = a.service.ForgotPassword(&authModel.LoginBody{
 		Email: jsonData["email"].(string),
 	})
