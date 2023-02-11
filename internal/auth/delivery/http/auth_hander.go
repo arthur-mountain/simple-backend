@@ -35,7 +35,15 @@ func AuthHandler(server *gin.RouterGroup, DB *gorm.DB, REDIS *databases.MyRedis)
 	server.POST("/system/forgot-password", controller.ForgotPasswordHandler)
 }
 
-// Login
+// ShowAccount godoc
+// @Summary      Login
+// @Description  Login to get authrization jwt token
+// @Tags         System
+// @Accept       json
+// @Produce      json
+// @Param        data      body     authModel.LoginBody  true  "login info"
+// @Success      200  {object}  response.Response
+// @Router       /system/login [post]
 func (a *authController) LoginHandler(c *gin.Context) {
 	var body authModel.LoginBody
 
@@ -53,7 +61,15 @@ func (a *authController) LoginHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, response.MakeCommonResponse(map[string]interface{}{"token": token}))
 }
 
-// Forgot Password
+// ShowAccount godoc
+// @Summary      forgot-password
+// @Description  Forgot password and reset it
+// @Tags         System
+// @Accept       json
+// @Produce      json
+// @Param        data   body   authModel.LoginBody  true  "forgot password info"
+// @Success      200  {object}  response.Response
+// @Router       /system/forgot-password [post]
 func (a *authController) ForgotPasswordHandler(c *gin.Context) {
 	data, err := c.GetRawData()
 	if err != nil {

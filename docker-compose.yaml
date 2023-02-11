@@ -1,7 +1,6 @@
-version: '3.8'
+version: "3.8"
 
-x-common:
-  &common
+x-common: &common
   networks:
     - backend-network
   restart: unless-stopped

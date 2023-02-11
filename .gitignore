@@ -12,3 +12,6 @@ architecture-2.jpg
 
 # Logs file
 /logs
+
+# swagger file
+/docs

@@ -14,6 +14,7 @@ import (
 	todo "simple-backend/internal/todo/delivery/http"
 	user "simple-backend/internal/user/delivery/http"
 	"simple-backend/internal/utils/databases"
+	"simple-backend/internal/utils/swagger"
 
 	"github.com/gin-gonic/gin"
 )
@@ -35,7 +36,6 @@ import (
 // 	ctx.Header("Content-Type", "application/json")
 // 	ctx.String(http.StatusOK, string(body))
 // }
-
 // apiV1.GET("/todo/:id", GetPost)
 
 func main() {
@@ -87,6 +87,9 @@ func main() {
 	user.UserHandler(serverV1, DB, REDIS)
 	// Todo
 	todo.TodoHandler(serverV1, DB)
+
+	// Swagger set up
+	swagger.Connect(server)
 
 	server.Run(fmt.Sprintf(":%s", os.Getenv("BACKEND_PORT")))
 }
