@@ -35,6 +35,15 @@ func UserHandler(server *gin.RouterGroup, DB *gorm.DB, REDIS *databases.MyRedis)
 	server.DELETE("/users/:id", controller.DeleteUser)
 }
 
+// ShowAccount godoc
+// @Summary      Users
+// @Description  All of user
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  response.Response
+// @Router       /users [get]
 func (a *userController) GetUsers(c *gin.Context) {
 	users, err := a.service.GetUsers()
 
@@ -46,7 +55,16 @@ func (a *userController) GetUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, response.MakeCommonResponse(users))
 }
 
-// Get User
+// ShowAccount godoc
+// @Summary      User
+// @Description  Get user by id
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path    int   true    "user id"
+// @Success      200  {object}  response.Response
+// @Router       /users/{id} [get]
 func (a *userController) GetUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -63,7 +81,16 @@ func (a *userController) GetUser(c *gin.Context) {
 	c.JSON(http.StatusOK, response.MakeCommonResponse(user))
 }
 
-// Create User
+// ShowAccount godoc
+// @Summary      Create User
+// @Description  Create User
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        data   body    model.UserCreate   true    "user info"
+// @Success      201  {object}  response.Response
+// @Router       /users/create [post]
 func (a *userController) CreateUser(c *gin.Context) {
 	var body model.UserCreate
 	if err := c.BindJSON(&body); err != nil {
@@ -85,7 +112,17 @@ func (a *userController) CreateUser(c *gin.Context) {
 	c.JSON(http.StatusCreated, response.MakeCommonResponse(user, http.StatusCreated))
 }
 
-// Update User
+// ShowAccount godoc
+// @Summary      Update User
+// @Description  Update User by id
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id     path    int                true    "user id"
+// @Param        data   body    model.UserUpdate   true    "new user info"
+// @Success      202  {object}  response.Response
+// @Router       /users/{id} [put]
 func (a *userController) UpdateUser(c *gin.Context) {
 	var id int
 	var body model.UserUpdate
@@ -110,7 +147,16 @@ func (a *userController) UpdateUser(c *gin.Context) {
 	c.JSON(http.StatusAccepted, response.MakeCommonResponse("update success", http.StatusAccepted))
 }
 
-// Delete User
+// ShowAccount godoc
+// @Summary      Delete User
+// @Description  Delete User by id
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id     path    int                true    "user id"
+// @Success      202  {object}  response.Response
+// @Router       /users/{id} [delete]
 func (a *userController) DeleteUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {

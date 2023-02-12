@@ -49,8 +49,14 @@ func (a *userService) CreateUser(input *model.UserCreate) (*model.UserTable, err
 }
 
 func (a *userService) UpdateUser(id uint, input *model.UserUpdate) error {
-	updatedUser := &model.UserTable{}
-	updatedUser.Id = id
+	user := model.UserTable{}
+	user.Id = id
+
+	// find user is exists
+	updatedUser, err := a.Repository.GetUser(&user)
+	if err != nil {
+		return err
+	}
 
 	if input.Name != "" {
 		updatedUser.Name = input.Name
@@ -60,7 +66,7 @@ func (a *userService) UpdateUser(id uint, input *model.UserUpdate) error {
 		updatedUser.Email = input.Email
 	}
 
-	err := a.Repository.UpdateUser(updatedUser)
+	err = a.Repository.UpdateUser(updatedUser)
 
 	return err
 }

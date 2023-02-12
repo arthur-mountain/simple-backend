@@ -38,6 +38,9 @@ import (
 // }
 // apiV1.GET("/todo/:id", GetPost)
 
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	server := gin.Default()
 
