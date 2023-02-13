@@ -31,6 +31,7 @@ func (u *userRepo) GetUsers() ([]*model.UserTable, error) {
 
 func (u *userRepo) GetUser(user *model.UserTable) (*model.UserTable, error) {
 	result := u.db.Model(&model.UserTable{}).First(user)
+
 	if result.Error != nil {
 		return nil, result.Error
 	}
