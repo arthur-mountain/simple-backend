@@ -45,19 +45,18 @@ func main() {
 	server := gin.Default()
 
 	// mysql init
-	url := fmt.Sprintf(
-		"%s:%s@%s(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		os.Getenv("MYSQL_USER"),
-		os.Getenv("MYSQL_PASSWORD"),
-		os.Getenv("MYSQL_NETWORK"),
-		os.Getenv("MYSQL_HOST"),
-		os.Getenv("MYSQL_PORT"),
-		os.Getenv("MYSQL_DATABASE"),
-	)
-	mysqlConfig := databases.MysqlConfig{DNS: &url}
-	DB, err := mysqlConfig.Connect()
-	if err != nil {
-		fmt.Println("init db error", err)
+	DB_HANDLER := databases.MysqlInit(map[string]interface{}{
+		"DNS": fmt.Sprintf(
+			"%s:%s@%s(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+			os.Getenv("MYSQL_USER"),
+			os.Getenv("MYSQL_PASSWORD"),
+			os.Getenv("MYSQL_NETWORK"),
+			os.Getenv("MYSQL_HOST"),
+			os.Getenv("MYSQL_PORT"),
+			os.Getenv("MYSQL_DATABASE"),
+		),
+	})
+	if err := DB_HANDLER.Connect(); err != nil {
 		return
 	}
 
@@ -82,14 +81,14 @@ func main() {
 
 	serverV1 := server.Group("api/v1")
 	// Login
-	auth.AuthHandler(serverV1, DB, REDIS)
+	auth.AuthHandler(serverV1, DB_HANDLER, REDIS)
 
 	// Auth middleware
 	serverV1.Use(authMiddleware.IsTokenValid)
 	// User
-	user.UserHandler(serverV1, DB, REDIS)
+	user.UserHandler(serverV1, DB_HANDLER, REDIS)
 	// Todo
-	todo.TodoHandler(serverV1, DB)
+	todo.TodoHandler(serverV1, DB_HANDLER)
 
 	// Swagger set up
 	swagger.Connect(server)

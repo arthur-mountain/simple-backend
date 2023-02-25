@@ -5,16 +5,15 @@ import (
 	"net/http"
 	model "simple-backend/internal/domain/todo"
 	repo "simple-backend/internal/todo/repository/mysql"
+	"simple-backend/internal/utils/databases"
 	errorUtils "simple-backend/internal/utils/error"
-
-	"gorm.io/gorm"
 )
 
 type todoService struct {
 	Repository model.TodoRepoInterface
 }
 
-func Init(db *gorm.DB) model.TodoServiceInterface {
+func Init(db *databases.TMysql) model.TodoServiceInterface {
 	return &todoService{
 		Repository: repo.Init(db),
 	}

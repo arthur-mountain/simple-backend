@@ -10,8 +10,6 @@ import (
 	authUtils "simple-backend/internal/utils/auth"
 	"simple-backend/internal/utils/databases"
 	errorUtils "simple-backend/internal/utils/error"
-
-	"gorm.io/gorm"
 )
 
 type authService struct {
@@ -19,7 +17,7 @@ type authService struct {
 	Cache      authModel.AuthCacheRepoInterface
 }
 
-func Init(db *gorm.DB, redis *databases.MyRedis) authModel.AuthServiceInterface {
+func Init(db *databases.TMysql, redis *databases.MyRedis) authModel.AuthServiceInterface {
 	return &authService{
 		Repository: repo.Init(db),
 		Cache:      redisCache.Init(redis),

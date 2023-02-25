@@ -12,16 +12,15 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type userController struct {
 	service model.UserServiceInterface
 }
 
-func UserHandler(server *gin.RouterGroup, DB *gorm.DB, REDIS *databases.MyRedis) {
+func UserHandler(server *gin.RouterGroup, db *databases.TMysql, REDIS *databases.MyRedis) {
 	controller := &userController{
-		service: userService.Init(DB, REDIS),
+		service: userService.Init(db, REDIS),
 	}
 
 	// Get All User

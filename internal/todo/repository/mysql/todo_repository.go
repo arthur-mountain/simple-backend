@@ -1,115 +1,142 @@
 package repository
 
 import (
-	"net/http"
 	model "simple-backend/internal/domain/todo"
+	"simple-backend/internal/utils/databases"
 	errorUtils "simple-backend/internal/utils/error"
 
 	"gorm.io/gorm"
 )
 
 type todoRepo struct {
-	db *gorm.DB
+	db *databases.TMysql
 }
 
-func Init(db *gorm.DB) model.TodoRepoInterface {
+func Init(db *databases.TMysql) model.TodoRepoInterface {
 	return &todoRepo{db: db}
+}
+
+func (t *todoRepo) WithTrx(trx *gorm.DB) model.TodoRepoInterface {
+	return &todoRepo{db: t.db.WithTrx(trx)}
 }
 
 func (t *todoRepo) GetAllTodo(field *model.TodoQueries) (*int64, []*model.TodoTable, *errorUtils.CustomError) {
 	var totalCount int64
 	allTodo := make([]*model.TodoTable, 0)
-	query := t.db.Model(&model.TodoTable{})
-	// query := t.db.Model(&model.TodoTable{}).Preload(clause.Associations)
 
-	if field.Title != nil {
-		query.Where("title = ?", field.Title)
-	}
+	err := t.db.Execute(func(DB *gorm.DB) error {
+		// query := DB.Preload(clause.Associations)
 
-	if field.IsCompleted != nil {
-		query.Where("is_completed = ?", field.IsCompleted)
-	}
+		if field.Title != nil {
+			DB.Where("title = ?", field.Title)
+		}
 
-	if field.CreatedAt != nil {
-		query.Where("created_at >= ?", field.CreatedAt)
-	}
+		if field.IsCompleted != nil {
+			DB.Where("is_completed = ?", field.IsCompleted)
+		}
 
-	if field.UpdatedAt != nil {
-		query.Where("updated_at >= ?", field.UpdatedAt)
-	}
+		if field.CreatedAt != nil {
+			DB.Where("created_at >= ?", field.CreatedAt)
+		}
 
-	if field.OrderBy != nil {
-		query.Order("created_at " + *field.OrderBy)
-	}
+		if field.UpdatedAt != nil {
+			DB.Where("updated_at >= ?", field.UpdatedAt)
+		}
 
-	if field.CurrentPage < 1 {
-		field.CurrentPage = 1
-	}
+		if field.OrderBy != nil {
+			DB.Order("created_at " + *field.OrderBy)
+		}
 
-	if field.PerPage < 1 {
-		field.PerPage = 15
-	}
+		if field.CurrentPage < 1 {
+			field.CurrentPage = 1
+		}
 
-	result := query.Count(&totalCount).Offset(int((field.CurrentPage - 1) * field.PerPage)).Limit(int(field.PerPage)).Find(&allTodo)
+		if field.PerPage < 1 {
+			field.PerPage = 15
+		}
 
-	if result.Error != nil {
-		return nil, nil, errorUtils.CheckGormError(result.Error)
+		return DB.Count(&totalCount).Offset(int((field.CurrentPage - 1) * field.PerPage)).Limit(int(field.PerPage)).Find(&allTodo).Error
+	}, &model.TodoTable{})
+
+	if err != nil {
+		return nil, nil, errorUtils.CheckGormError(err)
 	}
 
 	return &totalCount, allTodo, nil
 }
 
 func (t *todoRepo) GetTodo(todo *model.TodoTable) (*model.TodoTable, *errorUtils.CustomError) {
-	result := t.db.Model(&model.TodoTable{}).Where("user_id = ?", todo.UserId).First(&todo, todo.Id)
-	if result.Error != nil {
-		return nil, errorUtils.CheckGormError(result.Error)
+
+	err := t.db.Execute(func(DB *gorm.DB) error {
+		return DB.Where("user_id = ?", todo.UserId).First(&todo, todo.Id).Error
+	}, &model.TodoTable{})
+
+	if err != nil {
+		return nil, errorUtils.CheckGormError(err)
 	}
 
 	return todo, nil
 }
 
 func (t *todoRepo) CreateTodo(todo *model.TodoTable) *errorUtils.CustomError {
-	result := t.db.Model(&model.TodoTable{}).Create(&todo)
+	err := t.db.Execute(func(DB *gorm.DB) error {
+		return DB.Create(&todo).Error
+	}, &model.TodoTable{})
 
-	if result.Error != nil {
-		return errorUtils.CheckGormError(result.Error)
+	if err != nil {
+		return errorUtils.CheckGormError(err)
 	}
 
 	return nil
 }
 
 func (t *todoRepo) UpdateTodo(newTodo *model.TodoTable) (*model.TodoTable, *errorUtils.CustomError) {
-	query := t.db.Model(&model.TodoTable{}).Where("user_id = ?", newTodo.UserId)
+	err := t.db.Execute(func(DB *gorm.DB) error {
+		query := DB.Where("user_id = ?", newTodo.UserId)
 
-	result := query.Select("title", "description").Save(&newTodo)
-	if result.Error != nil {
-		return nil, errorUtils.CheckGormError(result.Error)
+		return query.Select("title", "description").Save(&newTodo).Error
+	}, &model.TodoTable{})
+
+	if err != nil {
+		return nil, errorUtils.CheckGormError(err)
 	}
 
 	return newTodo, nil
 }
 
 func (t *todoRepo) UpdateTodoCompleted(updatedTodo *model.TodoTable) *errorUtils.CustomError {
-	query := t.db.Model(&model.TodoTable{}).Where("user_id = ?", updatedTodo.UserId)
+	err := t.db.Execute(func(DB *gorm.DB) error {
+		query := DB.Where("user_id = ?", updatedTodo.UserId)
 
-	result := query.First(&updatedTodo).Update("is_completed", 1)
-	if result.Error != nil {
-		return errorUtils.CheckGormError(result.Error)
-	}
+		result := query.First(&updatedTodo).Update("is_completed", 1)
 
-	if result.RowsAffected == 0 {
-		return errorUtils.NewCustomError(gorm.ErrRecordNotFound, http.StatusNotFound)
+		if result.Error != nil {
+			return result.Error
+		}
+
+		if result.RowsAffected == 0 {
+			return gorm.ErrRecordNotFound
+		}
+
+		return nil
+	}, &model.TodoTable{})
+
+	if err != nil {
+		return errorUtils.CheckGormError(err)
 	}
 
 	return nil
 }
 
 func (t *todoRepo) DeleteTodo(deletedTodo *model.TodoTable) (*model.TodoTable, *errorUtils.CustomError) {
-	query := t.db.Model(&model.TodoTable{}).Where("user_id = ?", deletedTodo.UserId)
+	err := t.db.Execute(func(DB *gorm.DB) error {
+		query := DB.Where("user_id = ?", deletedTodo.UserId)
 
-	result := query.First(&deletedTodo).Delete(&deletedTodo)
-	if result.Error != nil {
-		return nil, errorUtils.CheckGormError(result.Error)
+		return query.First(&deletedTodo).Delete(&deletedTodo).Error
+	}, &model.TodoTable{})
+
+	if err != nil {
+		return nil, errorUtils.CheckGormError(err)
 	}
 
 	return deletedTodo, nil

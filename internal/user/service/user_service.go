@@ -7,8 +7,6 @@ import (
 	authUtils "simple-backend/internal/utils/auth"
 	"simple-backend/internal/utils/databases"
 	errorUtils "simple-backend/internal/utils/error"
-
-	"gorm.io/gorm"
 )
 
 type userService struct {
@@ -16,7 +14,7 @@ type userService struct {
 	Cache      model.UserCacheRepoInterface
 }
 
-func Init(db *gorm.DB, redis *databases.MyRedis) model.UserServiceInterface {
+func Init(db *databases.TMysql, redis *databases.MyRedis) model.UserServiceInterface {
 	return &userService{
 		Repository: repo.Init(db),
 		Cache:      redisCache.Init(redis),

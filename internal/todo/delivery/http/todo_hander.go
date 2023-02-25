@@ -4,6 +4,7 @@ import (
 	"net/http"
 	model "simple-backend/internal/domain/todo"
 	todoService "simple-backend/internal/todo/service"
+	"simple-backend/internal/utils/databases"
 	errorUtils "simple-backend/internal/utils/error"
 	responseUtils "simple-backend/internal/utils/response"
 	"strconv"
@@ -16,14 +17,17 @@ type todoController struct {
 	service model.TodoServiceInterface
 }
 
-func TodoHandler(server *gin.RouterGroup, DB *gorm.DB) {
+func TodoHandler(server *gin.RouterGroup, db *databases.TMysql) {
 	controller := &todoController{
-		service: todoService.Init(DB),
+		service: todoService.Init(db),
 	}
 
-	if !DB.Migrator().HasTable(&model.TodoTable{}) {
-		DB.AutoMigrate(&model.TodoTable{})
-	}
+	db.Execute(func(DB *gorm.DB) error {
+		if !DB.Migrator().HasTable(&model.TodoTable{}) {
+			DB.AutoMigrate(&model.TodoTable{})
+		}
+		return nil
+	}, nil)
 
 	// Get All todo
 	server.GET("/todos", controller.getAllTodo)

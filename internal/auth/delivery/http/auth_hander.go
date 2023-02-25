@@ -23,14 +23,17 @@ type authController struct {
 	service authModel.AuthServiceInterface
 }
 
-func AuthHandler(server *gin.RouterGroup, DB *gorm.DB, REDIS *databases.MyRedis) {
+func AuthHandler(server *gin.RouterGroup, db *databases.TMysql, REDIS *databases.MyRedis) {
 	controller := &authController{
-		service: authService.Init(DB, REDIS),
+		service: authService.Init(db, REDIS),
 	}
 
-	if !DB.Migrator().HasTable(&userModel.UserTable{}) {
-		migrateUser(DB)
-	}
+	db.Execute(func(DB *gorm.DB) error {
+		if !DB.Migrator().HasTable(&userModel.UserTable{}) {
+			migrateUser(DB)
+		}
+		return nil
+	}, nil)
 
 	server.POST("/system/login", controller.LoginHandler)
 	server.POST("/system/forgot-password", controller.ForgotPasswordHandler)
