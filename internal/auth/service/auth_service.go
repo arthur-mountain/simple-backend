@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"net/http"
 	repo "simple-backend/internal/auth/repository/mysql"
 	redisCache "simple-backend/internal/auth/repository/redis"
@@ -38,9 +39,8 @@ func (a *authService) Login(input *authModel.LoginBody) (*string, *errorUtils.Cu
 	isPassed := authUtils.IsPasswordPassed(user.Password, input.Password)
 	if !isPassed {
 		return nil, errorUtils.NewCustomError(
+			errors.New("password is not correct"),
 			http.StatusUnauthorized,
-			"password is not correct",
-			nil,
 		)
 	}
 
@@ -51,9 +51,8 @@ func (a *authService) Login(input *authModel.LoginBody) (*string, *errorUtils.Cu
 
 	if err != nil {
 		return nil, errorUtils.NewCustomError(
+			tokenErr,
 			http.StatusUnauthorized,
-			tokenErr.Error(),
-			nil,
 		)
 	}
 

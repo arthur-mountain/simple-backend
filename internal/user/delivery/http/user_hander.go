@@ -53,7 +53,7 @@ func (a *userController) GetUsers(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, responseUtils.MakeCommonResponse(users, nil, nil, nil))
+	c.JSON(http.StatusOK, responseUtils.New(users))
 }
 
 // ShowAccount godoc
@@ -72,8 +72,6 @@ func (a *userController) GetUser(c *gin.Context) {
 	customError := errorUtils.CheckErrAndConvert(
 		err,
 		http.StatusBadRequest,
-		nil,
-		nil,
 	)
 	if customError != nil {
 		c.JSON(customError.HttpStatusCode, customError)
@@ -86,7 +84,7 @@ func (a *userController) GetUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, responseUtils.MakeCommonResponse(user, nil, nil, nil))
+	c.JSON(http.StatusOK, responseUtils.New(user))
 }
 
 // ShowAccount godoc
@@ -105,8 +103,6 @@ func (a *userController) CreateUser(c *gin.Context) {
 	customError := errorUtils.CheckErrAndConvert(
 		c.BindJSON(&body),
 		http.StatusBadRequest,
-		nil,
-		nil,
 	)
 	if customError != nil {
 		c.JSON(customError.HttpStatusCode, customError)
@@ -124,8 +120,7 @@ func (a *userController) CreateUser(c *gin.Context) {
 		return
 	}
 
-	responseCode := http.StatusCreated
-	c.JSON(responseCode, responseUtils.MakeCommonResponse(user, &responseCode, nil, nil))
+	responseUtils.New(user).SetHttpCode(http.StatusCreated).Done(c)
 }
 
 // ShowAccount godoc
@@ -146,8 +141,6 @@ func (a *userController) UpdateUser(c *gin.Context) {
 	customError := errorUtils.CheckErrAndConvert(
 		err,
 		http.StatusBadRequest,
-		nil,
-		nil,
 	)
 	if customError != nil {
 		c.JSON(customError.HttpStatusCode, customError)
@@ -157,8 +150,6 @@ func (a *userController) UpdateUser(c *gin.Context) {
 	customError = errorUtils.CheckErrAndConvert(
 		c.BindJSON(&body),
 		http.StatusUnprocessableEntity,
-		nil,
-		nil,
 	)
 	if customError != nil {
 		c.JSON(customError.HttpStatusCode, customError)
@@ -171,8 +162,7 @@ func (a *userController) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	responseCode := http.StatusAccepted
-	c.JSON(responseCode, responseUtils.MakeCommonResponse("update success", &responseCode, nil, nil))
+	responseUtils.New("update success").SetHttpCode(http.StatusAccepted).Done(c)
 }
 
 // ShowAccount godoc
@@ -190,8 +180,6 @@ func (a *userController) DeleteUser(c *gin.Context) {
 	customError := errorUtils.CheckErrAndConvert(
 		err,
 		http.StatusBadRequest,
-		nil,
-		nil,
 	)
 	if customError != nil {
 		c.JSON(customError.HttpStatusCode, customError)
@@ -204,6 +192,5 @@ func (a *userController) DeleteUser(c *gin.Context) {
 		return
 	}
 
-	responseCode := http.StatusAccepted
-	c.JSON(responseCode, responseUtils.MakeCommonResponse("delete success", &responseCode, nil, nil))
+	responseUtils.New("delete success").SetHttpCode(http.StatusAccepted).Done(c)
 }

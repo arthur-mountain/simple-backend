@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"net/http"
 	model "simple-backend/internal/domain/todo"
 	repo "simple-backend/internal/todo/repository/mysql"
@@ -73,17 +74,15 @@ func (t *todoService) UpdateTodoCompleted(input *model.TodoUpdate) *errorUtils.C
 
 	if updatedTodo.UserId != input.UserId {
 		return errorUtils.NewCustomError(
+			errors.New("identify error"),
 			http.StatusForbidden,
-			"identify error",
-			nil,
 		)
 	}
 
 	if updatedTodo.IsCompleted == 1 {
 		return errorUtils.NewCustomError(
+			errors.New("todo is completed"),
 			http.StatusBadRequest,
-			"todo is completed",
-			nil,
 		)
 	}
 

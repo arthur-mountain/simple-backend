@@ -98,7 +98,7 @@ func (t *todoRepo) UpdateTodoCompleted(updatedTodo *model.TodoTable) *errorUtils
 	}
 
 	if result.RowsAffected == 0 {
-		return errorUtils.NewCustomError(http.StatusNotFound, gorm.ErrRecordNotFound.Error(), nil)
+		return errorUtils.NewCustomError(gorm.ErrRecordNotFound, http.StatusNotFound)
 	}
 
 	return nil

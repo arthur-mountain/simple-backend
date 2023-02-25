@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"simple-backend/internal/interactor/page"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Response struct {
@@ -14,6 +16,7 @@ type Response struct {
 	Items          interface{} `json:"items,omitempty"`
 }
 
+// return self for easy to chain set properties and put into c.JSON
 func (r *Response) AppendPagination(pageInfo *page.Pagination) *Response {
 	r.Items = map[string]interface{}{
 		"data":        r.Items,
@@ -22,27 +25,30 @@ func (r *Response) AppendPagination(pageInfo *page.Pagination) *Response {
 		"totalCount":  pageInfo.TotalCount,
 		"totalPage":   int64(math.Abs(float64(pageInfo.TotalCount / pageInfo.PerPage))),
 	}
-
-	return r // return self for easy to put into c.JSON
+	return r
+}
+func (r *Response) SetHttpCode(httpCode int) *Response {
+	r.HttpStatusCode = httpCode
+	return r
+}
+func (r *Response) SetCustomCode(code string) *Response {
+	r.Code = code
+	return r
+}
+func (r *Response) SetMessage(message string) *Response {
+	r.Message = message
+	return r
+}
+func (r *Response) Done(c *gin.Context) {
+	if r.Code == "" {
+		r.Code = strconv.Itoa(r.HttpStatusCode)
+	}
+	c.JSON(r.HttpStatusCode, r)
 }
 
-func MakeCommonResponse(body interface{}, httpStatusCode *int, code *string, message *string) *Response {
-	res := &Response{
+func New(body interface{}) *Response {
+	return &Response{
 		HttpStatusCode: http.StatusOK,
-		Code:           strconv.Itoa(http.StatusOK),
 		Items:          body,
 	}
-
-	if httpStatusCode != nil {
-		res.HttpStatusCode = *httpStatusCode
-		res.Code = strconv.Itoa(*httpStatusCode)
-	}
-	if code != nil {
-		res.Code = *code
-	}
-	if message != nil {
-		res.Message = *message
-	}
-
-	return res
 }

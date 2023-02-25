@@ -60,8 +60,6 @@ func (t *todoController) getAllTodo(c *gin.Context) {
 	customError := errorUtils.CheckErrAndConvert(
 		c.ShouldBindQuery(&field),
 		http.StatusBadRequest,
-		nil,
-		nil,
 	)
 	if customError != nil {
 		c.JSON(customError.HttpStatusCode, customError)
@@ -77,8 +75,7 @@ func (t *todoController) getAllTodo(c *gin.Context) {
 	}
 
 	field.TotalCount = *totalCount
-
-	c.JSON(http.StatusOK, responseUtils.MakeCommonResponse(allTodo, nil, nil, nil).AppendPagination(&field.Pagination))
+	responseUtils.New(allTodo).AppendPagination(&field.Pagination).Done(c)
 }
 
 // ShowAccount godoc
@@ -97,8 +94,6 @@ func (t *todoController) getTodo(c *gin.Context) {
 	customError := errorUtils.CheckErrAndConvert(
 		err,
 		http.StatusBadRequest,
-		nil,
-		nil,
 	)
 	if customError != nil {
 		c.JSON(customError.HttpStatusCode, customError)
@@ -112,7 +107,7 @@ func (t *todoController) getTodo(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, responseUtils.MakeCommonResponse(todo, nil, nil, nil))
+	responseUtils.New(todo).Done(c)
 }
 
 // ShowAccount godoc
@@ -131,8 +126,6 @@ func (t *todoController) createTodo(c *gin.Context) {
 	customError := errorUtils.CheckErrAndConvert(
 		c.BindJSON(&body),
 		http.StatusBadRequest,
-		nil,
-		nil,
 	)
 	if customError != nil {
 		c.JSON(customError.HttpStatusCode, customError)
@@ -147,8 +140,7 @@ func (t *todoController) createTodo(c *gin.Context) {
 		return
 	}
 
-	responseCode := http.StatusCreated
-	c.JSON(responseCode, responseUtils.MakeCommonResponse(body, &responseCode, nil, nil))
+	responseUtils.New(body).SetHttpCode(http.StatusCreated).Done(c)
 }
 
 // ShowAccount godoc
@@ -168,8 +160,6 @@ func (t *todoController) updateTodo(c *gin.Context) {
 	customError := errorUtils.CheckErrAndConvert(
 		err,
 		http.StatusUnprocessableEntity,
-		nil,
-		nil,
 	)
 	if customError != nil {
 		c.JSON(customError.HttpStatusCode, customError)
@@ -181,8 +171,6 @@ func (t *todoController) updateTodo(c *gin.Context) {
 	customError = errorUtils.CheckErrAndConvert(
 		c.BindJSON(&newTodo),
 		http.StatusUnprocessableEntity,
-		nil,
-		nil,
 	)
 	if customError != nil {
 		c.JSON(customError.HttpStatusCode, customError)
@@ -198,8 +186,7 @@ func (t *todoController) updateTodo(c *gin.Context) {
 		return
 	}
 
-	responseCode := http.StatusAccepted
-	c.JSON(responseCode, responseUtils.MakeCommonResponse(todo, &responseCode, nil, nil))
+	responseUtils.New(todo).SetHttpCode(http.StatusAccepted).Done(c)
 }
 
 // ShowAccount godoc
@@ -218,8 +205,6 @@ func (t *todoController) updateTodoCompleted(c *gin.Context) {
 	customError := errorUtils.CheckErrAndConvert(
 		err,
 		http.StatusUnprocessableEntity,
-		nil,
-		nil,
 	)
 	if customError != nil {
 		c.JSON(customError.HttpStatusCode, customError)
@@ -236,8 +221,7 @@ func (t *todoController) updateTodoCompleted(c *gin.Context) {
 		return
 	}
 
-	responseCode := http.StatusAccepted
-	c.JSON(responseCode, responseUtils.MakeCommonResponse(1, &responseCode, nil, nil))
+	responseUtils.New(1).SetHttpCode(http.StatusAccepted).Done(c)
 }
 
 // ShowAccount godoc
@@ -256,8 +240,6 @@ func (t *todoController) deleteTodo(c *gin.Context) {
 	customError := errorUtils.CheckErrAndConvert(
 		err,
 		http.StatusUnprocessableEntity,
-		nil,
-		nil,
 	)
 	if customError != nil {
 		c.JSON(customError.HttpStatusCode, customError)
@@ -271,6 +253,5 @@ func (t *todoController) deleteTodo(c *gin.Context) {
 		return
 	}
 
-	responseCode := http.StatusAccepted
-	c.JSON(responseCode, responseUtils.MakeCommonResponse(deletedTodo, &responseCode, nil, nil))
+	responseUtils.New(deletedTodo).SetHttpCode(http.StatusAccepted).Done(c)
 }

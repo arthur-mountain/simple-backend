@@ -20,36 +20,31 @@ type CustomError struct {
 	Reasons        []*interface{} `json:"reasons,omitempty"`
 }
 
-func (e *CustomError) AppendReason(reason *interface{}) *CustomError {
-	e.Reasons = append(e.Reasons, reason)
-	return e // return self for easy way to chain append reason
+// could set or update those error field, return self for easy way to chain
+func (c *CustomError) SetCustomCode(code string) *CustomError {
+	c.Code = code
+	return c
+}
+func (c *CustomError) SetMessage(message string) *CustomError {
+	c.Message = message
+	return c
+}
+func (c *CustomError) AppendReason(reason *interface{}) *CustomError {
+	c.Reasons = append(c.Reasons, reason)
+	return c
 }
 
-func NewCustomError(
-	httpStatusCode int,
-	message string,
-	code *string,
-) *CustomError {
-	customError := &CustomError{
+func NewCustomError(err error, httpStatusCode int) *CustomError {
+	return &CustomError{
 		HttpStatusCode: httpStatusCode,
 		Code:           strconv.Itoa(httpStatusCode),
-		Message:        message,
+		Message:        err.Error(),
 	}
-
-	if code != nil {
-		customError.Code = *code
-	}
-
-	return customError
 }
 
-func CheckErrAndConvert(err error, httpStatusCode int, code *string, message *string) *CustomError {
+func CheckErrAndConvert(err error, httpStatusCode int) *CustomError {
 	if err != nil {
-		if message != nil {
-			return NewCustomError(httpStatusCode, *message, code)
-		}
-
-		return NewCustomError(httpStatusCode, err.Error(), code)
+		return NewCustomError(err, httpStatusCode)
 	}
 
 	return nil
@@ -59,18 +54,22 @@ func CheckErrAndConvert(err error, httpStatusCode int, code *string, message *st
 // If database changing, only to add new database error check func
 func CheckGormError(err error) *CustomError {
 	var httpStatusCode int
-	var code, message string
+	var message string
 
 	switch {
 	case errors.Is(err, gorm.ErrRecordNotFound):
 		httpStatusCode = http.StatusNotFound
-	case errors.Is(err, gorm.ErrInvalidData): // unsupported data
-	case errors.Is(err, gorm.ErrInvalidField): // invalid field
-	case errors.Is(err, gorm.ErrEmptySlice): // empty slice found
+	case
+		errors.Is(err, gorm.ErrInvalidData),
+		errors.Is(err, gorm.ErrInvalidField): // unsupported data
+		httpStatusCode = http.StatusUnprocessableEntity
+	case errors.Is(err, gorm.ErrEmptySlice): // empty slice founded
+		httpStatusCode = http.StatusOK
+		message = "empty data was founded"
 	default: // TODO: these is server error should logger
 		httpStatusCode = http.StatusExpectationFailed
 		message = "please contact the administrator"
 	}
 
-	return NewCustomError(httpStatusCode, message, &code)
+	return NewCustomError(errors.New(message), httpStatusCode)
 }

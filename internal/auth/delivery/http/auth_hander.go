@@ -47,7 +47,10 @@ func AuthHandler(server *gin.RouterGroup, DB *gorm.DB, REDIS *databases.MyRedis)
 // @Router       /system/login [post]
 func (a *authController) LoginHandler(c *gin.Context) {
 	var body authModel.LoginBody
-	customError := errorUtils.CheckErrAndConvert(c.BindJSON(&body), http.StatusUnprocessableEntity, nil, nil)
+	customError := errorUtils.CheckErrAndConvert(
+		c.BindJSON(&body),
+		http.StatusUnprocessableEntity,
+	)
 
 	if customError != nil {
 		c.JSON(customError.HttpStatusCode, customError)
@@ -60,7 +63,7 @@ func (a *authController) LoginHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, responseUtils.MakeCommonResponse(map[string]interface{}{"token": token}, nil, nil, nil))
+	responseUtils.New(map[string]interface{}{"token": token}).Done(c)
 }
 
 // ShowAccount godoc
@@ -75,14 +78,14 @@ func (a *authController) LoginHandler(c *gin.Context) {
 func (a *authController) ForgotPasswordHandler(c *gin.Context) {
 	data, err := c.GetRawData()
 
-	customError := errorUtils.CheckErrAndConvert(err, http.StatusInternalServerError, nil, nil)
+	customError := errorUtils.CheckErrAndConvert(err, http.StatusInternalServerError)
 	if customError != nil {
 		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
 	var jsonData map[string]interface{}
-	customError = errorUtils.CheckErrAndConvert(json.Unmarshal(data, &jsonData), http.StatusInternalServerError, nil, nil)
+	customError = errorUtils.CheckErrAndConvert(json.Unmarshal(data, &jsonData), http.StatusInternalServerError)
 	if customError != nil {
 		c.JSON(customError.HttpStatusCode, customError)
 		return
@@ -104,8 +107,7 @@ func (a *authController) ForgotPasswordHandler(c *gin.Context) {
 		 2. add api endpoint, verify token, add redis cache and expired, return verify_code
 		 3. reset password body struct should add verify_code
 	*/
-	responseCode := http.StatusAccepted
-	c.JSON(responseCode, responseUtils.MakeCommonResponse(os.Getenv("RESET_PASSWORD_URI"), &responseCode, nil, nil))
+	responseUtils.New(os.Getenv("RESET_PASSWORD_URI")).SetHttpCode(http.StatusAccepted).Done(c)
 }
 
 func migrateUser(DB *gorm.DB) {

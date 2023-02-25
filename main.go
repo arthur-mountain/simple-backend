@@ -57,7 +57,7 @@ func main() {
 	mysqlConfig := databases.MysqlConfig{DNS: &url}
 	DB, err := mysqlConfig.Connect()
 	if err != nil {
-		fmt.Println("init db error", err.Error())
+		fmt.Println("init db error", err)
 		return
 	}
 
@@ -71,7 +71,7 @@ func main() {
 		defaultRedisCtx,
 	)
 	if err != nil {
-		fmt.Println("redis init error", err.Error())
+		fmt.Println("redis init error", err)
 		return
 	}
 
