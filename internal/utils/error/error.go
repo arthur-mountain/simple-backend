@@ -8,11 +8,16 @@ import (
 	"gorm.io/gorm"
 )
 
+// TODO: implement reason struct, that allowed to constraints reason field
+// type TReason struct{}
+
+// simple error description could use message field
+// complex error description could use reasons field
 type CustomError struct {
 	HttpStatusCode int            `json:"-"`
 	Code           string         `json:"code"`
 	Message        string         `json:"message"`
-	Reasons        []*interface{} `json:"reasons,omitempty"` // error reason slice or nil
+	Reasons        []*interface{} `json:"reasons,omitempty"`
 }
 
 func (e *CustomError) AppendReason(reason *interface{}) *CustomError {
@@ -20,19 +25,19 @@ func (e *CustomError) AppendReason(reason *interface{}) *CustomError {
 	return e // return self for easy way to chain append reason
 }
 
-func NewErrorResponse(
+func NewCustomError(
 	httpStatusCode int,
 	message string,
 	code *string,
 ) *CustomError {
 	customError := &CustomError{
 		HttpStatusCode: httpStatusCode,
-		Code:           *code,
+		Code:           strconv.Itoa(httpStatusCode),
 		Message:        message,
 	}
 
-	if customError.Code == "" {
-		customError.Code = strconv.Itoa(customError.HttpStatusCode)
+	if code != nil {
+		customError.Code = *code
 	}
 
 	return customError
@@ -41,10 +46,10 @@ func NewErrorResponse(
 func CheckErrAndConvert(err error, httpStatusCode int, code *string, message *string) *CustomError {
 	if err != nil {
 		if message != nil {
-			return NewErrorResponse(httpStatusCode, *message, code)
+			return NewCustomError(httpStatusCode, *message, code)
 		}
 
-		return NewErrorResponse(httpStatusCode, err.Error(), code)
+		return NewCustomError(httpStatusCode, err.Error(), code)
 	}
 
 	return nil
@@ -54,8 +59,7 @@ func CheckErrAndConvert(err error, httpStatusCode int, code *string, message *st
 // If database changing, only to add new database error check func
 func CheckGormError(err error) *CustomError {
 	var httpStatusCode int
-	var code string
-	var message string
+	var code, message string
 
 	switch {
 	case errors.Is(err, gorm.ErrRecordNotFound):
@@ -68,5 +72,5 @@ func CheckGormError(err error) *CustomError {
 		message = "please contact the administrator"
 	}
 
-	return NewErrorResponse(httpStatusCode, message, &code)
+	return NewCustomError(httpStatusCode, message, &code)
 }

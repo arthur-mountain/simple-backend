@@ -37,7 +37,7 @@ func (a *authService) Login(input *authModel.LoginBody) (*string, *errorUtils.Cu
 
 	isPassed := authUtils.IsPasswordPassed(user.Password, input.Password)
 	if !isPassed {
-		return nil, errorUtils.NewErrorResponse(
+		return nil, errorUtils.NewCustomError(
 			http.StatusUnauthorized,
 			"password is not correct",
 			nil,
@@ -50,7 +50,7 @@ func (a *authService) Login(input *authModel.LoginBody) (*string, *errorUtils.Cu
 	})
 
 	if err != nil {
-		return nil, errorUtils.NewErrorResponse(
+		return nil, errorUtils.NewCustomError(
 			http.StatusUnauthorized,
 			tokenErr.Error(),
 			nil,

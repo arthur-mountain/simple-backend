@@ -72,7 +72,7 @@ func (t *todoService) UpdateTodoCompleted(input *model.TodoUpdate) *errorUtils.C
 	}
 
 	if updatedTodo.UserId != input.UserId {
-		return errorUtils.NewErrorResponse(
+		return errorUtils.NewCustomError(
 			http.StatusForbidden,
 			"identify error",
 			nil,
@@ -80,7 +80,7 @@ func (t *todoService) UpdateTodoCompleted(input *model.TodoUpdate) *errorUtils.C
 	}
 
 	if updatedTodo.IsCompleted == 1 {
-		return errorUtils.NewErrorResponse(
+		return errorUtils.NewCustomError(
 			http.StatusBadRequest,
 			"todo is completed",
 			nil,
