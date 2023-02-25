@@ -1,9 +1,10 @@
 package service
 
 import (
-	"errors"
+	"net/http"
 	model "simple-backend/internal/domain/todo"
 	repo "simple-backend/internal/todo/repository/mysql"
+	errorUtils "simple-backend/internal/utils/error"
 
 	"gorm.io/gorm"
 )
@@ -18,35 +19,28 @@ func Init(db *gorm.DB) model.TodoServiceInterface {
 	}
 }
 
-func (t *todoService) GetAllTodo(field *model.TodoQueries) (*int64, []*model.TodoTable, error) {
-	totalCount, allTodo, err := t.Repository.GetAllTodo(field)
-
-	return totalCount, allTodo, err
+func (t *todoService) GetAllTodo(field *model.TodoQueries) (*int64, []*model.TodoTable, *errorUtils.CustomError) {
+	return t.Repository.GetAllTodo(field)
 }
 
-func (t *todoService) GetTodo(id uint, uid string) (*model.TodoTable, error) {
-	var err error
+func (t *todoService) GetTodo(id uint, uid string) (*model.TodoTable, *errorUtils.CustomError) {
 	todo := new(model.TodoTable)
 	todo.Id = id
 	todo.UserId = uid
 
-	todo, err = t.Repository.GetTodo(todo)
-
-	return todo, err
+	return t.Repository.GetTodo(todo)
 }
 
-func (t *todoService) CreateTodo(input *model.TodoCreate) error {
+func (t *todoService) CreateTodo(input *model.TodoCreate) *errorUtils.CustomError {
 	table := new(model.TodoTable)
 	table.UserId = input.UserId
 	table.Title = input.Title
 	table.Description = input.Description
 
-	err := t.Repository.CreateTodo(table)
-
-	return err
+	return t.Repository.CreateTodo(table)
 }
 
-func (t *todoService) UpdateTodo(input *model.TodoUpdate) (*model.TodoTable, error) {
+func (t *todoService) UpdateTodo(input *model.TodoUpdate) (*model.TodoTable, *errorUtils.CustomError) {
 	table := new(model.TodoTable)
 	table.Id = input.Id
 	table.UserId = input.UserId
@@ -63,13 +57,11 @@ func (t *todoService) UpdateTodo(input *model.TodoUpdate) (*model.TodoTable, err
 		table.IsCompleted = *input.IsCompleted
 	}
 
-	updatedTodo, err := t.Repository.UpdateTodo(table)
-
-	return updatedTodo, err
+	return t.Repository.UpdateTodo(table)
 }
 
-func (t *todoService) UpdateTodoCompleted(input *model.TodoUpdate) error {
-	var err error
+func (t *todoService) UpdateTodoCompleted(input *model.TodoUpdate) *errorUtils.CustomError {
+	var err *errorUtils.CustomError
 	updatedTodo := new(model.TodoTable)
 	updatedTodo.Id = input.Id
 	updatedTodo.UserId = input.UserId
@@ -80,20 +72,26 @@ func (t *todoService) UpdateTodoCompleted(input *model.TodoUpdate) error {
 	}
 
 	if updatedTodo.UserId != input.UserId {
-		return errors.New("identify error")
+		return errorUtils.NewErrorResponse(
+			http.StatusForbidden,
+			"identify error",
+			nil,
+		)
 	}
 
 	if updatedTodo.IsCompleted == 1 {
-		return errors.New("todo is completed")
+		return errorUtils.NewErrorResponse(
+			http.StatusBadRequest,
+			"todo is completed",
+			nil,
+		)
 	}
 
-	err = t.Repository.UpdateTodoCompleted(updatedTodo)
-
-	return err
+	return t.Repository.UpdateTodoCompleted(updatedTodo)
 }
 
-func (t *todoService) DeleteTodo(id uint, uid string) (*model.TodoTable, error) {
-	var err error
+func (t *todoService) DeleteTodo(id uint, uid string) (*model.TodoTable, *errorUtils.CustomError) {
+	var err *errorUtils.CustomError
 	deletedTodo := new(model.TodoTable)
 	deletedTodo.Id = id
 	deletedTodo.UserId = uid

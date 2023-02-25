@@ -4,6 +4,7 @@ import (
 	userModel "simple-backend/internal/domain/user"
 	"simple-backend/internal/interactor/page"
 	"simple-backend/internal/interactor/special"
+	errorUtils "simple-backend/internal/utils/error"
 	"time"
 )
 
@@ -55,21 +56,21 @@ type TodoQueries struct {
 }
 
 type TodoRepoInterface interface {
-	GetAllTodo(field *TodoQueries) (*int64, []*TodoTable, error)
-	GetTodo(todo *TodoTable) (*TodoTable, error)
-	CreateTodo(todo *TodoTable) error
-	UpdateTodo(todo *TodoTable) (*TodoTable, error)
-	UpdateTodoCompleted(todo *TodoTable) error
-	DeleteTodo(todo *TodoTable) (*TodoTable, error)
+	GetAllTodo(field *TodoQueries) (*int64, []*TodoTable, *errorUtils.CustomError)
+	GetTodo(todo *TodoTable) (*TodoTable, *errorUtils.CustomError)
+	CreateTodo(todo *TodoTable) *errorUtils.CustomError
+	UpdateTodo(todo *TodoTable) (*TodoTable, *errorUtils.CustomError)
+	UpdateTodoCompleted(todo *TodoTable) *errorUtils.CustomError
+	DeleteTodo(todo *TodoTable) (*TodoTable, *errorUtils.CustomError)
 }
 
 type TodoServiceInterface interface {
-	GetAllTodo(field *TodoQueries) (*int64, []*TodoTable, error)
-	GetTodo(id uint, uid string) (*TodoTable, error)
-	CreateTodo(input *TodoCreate) error
-	UpdateTodo(input *TodoUpdate) (*TodoTable, error)
-	UpdateTodoCompleted(input *TodoUpdate) error
-	DeleteTodo(id uint, uid string) (*TodoTable, error)
+	GetAllTodo(field *TodoQueries) (*int64, []*TodoTable, *errorUtils.CustomError)
+	GetTodo(id uint, uid string) (*TodoTable, *errorUtils.CustomError)
+	CreateTodo(input *TodoCreate) *errorUtils.CustomError
+	UpdateTodo(input *TodoUpdate) (*TodoTable, *errorUtils.CustomError)
+	UpdateTodoCompleted(input *TodoUpdate) *errorUtils.CustomError
+	DeleteTodo(id uint, uid string) (*TodoTable, *errorUtils.CustomError)
 }
 
 func (t *TodoTable) TableName() string {

@@ -1,13 +1,14 @@
 package service
 
 import (
-	"errors"
+	"net/http"
 	repo "simple-backend/internal/auth/repository/mysql"
 	redisCache "simple-backend/internal/auth/repository/redis"
 	authModel "simple-backend/internal/domain/auth"
 	userModel "simple-backend/internal/domain/user"
 	authUtils "simple-backend/internal/utils/auth"
 	"simple-backend/internal/utils/databases"
+	errorUtils "simple-backend/internal/utils/error"
 
 	"gorm.io/gorm"
 )
@@ -24,40 +25,43 @@ func Init(db *gorm.DB, redis *databases.MyRedis) authModel.AuthServiceInterface 
 	}
 }
 
-func (a *authService) Login(input *authModel.LoginBody) (string, error) {
+func (a *authService) Login(input *authModel.LoginBody) (*string, *errorUtils.CustomError) {
 	user, err := a.Repository.GetUser(&userModel.UserTable{
 		Email:    input.Email,
 		Password: input.Password,
 	})
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	isPassed := authUtils.IsPasswordPassed(user.Password, input.Password)
-
 	if !isPassed {
-		return "", errors.New("password is not correct")
+		return nil, errorUtils.NewErrorResponse(
+			http.StatusUnauthorized,
+			"password is not correct",
+			nil,
+		)
 	}
 
-	token, err := authUtils.GenerateToken(map[string]interface{}{
+	token, tokenErr := authUtils.GenerateToken(map[string]interface{}{
 		"uid":      user.IdentityId,
 		"userName": user.Name,
 	})
 
 	if err != nil {
-		return "", err
+		return nil, errorUtils.NewErrorResponse(
+			http.StatusUnauthorized,
+			tokenErr.Error(),
+			nil,
+		)
 	}
 
-	return token, nil
+	return &token, nil
 }
 
-func (a *authService) ForgotPassword(input *authModel.LoginBody) error {
+func (a *authService) ForgotPassword(input *authModel.LoginBody) *errorUtils.CustomError {
 	_, err := a.Repository.GetUser(&userModel.UserTable{Email: input.Email})
 
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }

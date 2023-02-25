@@ -3,6 +3,7 @@ package domain
 import (
 	"simple-backend/internal/interactor/page"
 	"simple-backend/internal/interactor/special"
+	errorUtils "simple-backend/internal/utils/error"
 	"time"
 
 	"github.com/google/uuid"
@@ -50,19 +51,19 @@ type UserQueries struct {
 }
 
 type UserServiceInterface interface {
-	GetUsers() ([]*UserTable, error)
-	GetUser(id uint) (*UserTable, error)
-	CreateUser(input *UserCreate) (*UserTable, error)
-	UpdateUser(id uint, input *UserUpdate) error
-	DeleteUser(id uint) error
+	GetUsers() ([]*UserTable, *errorUtils.CustomError)
+	GetUser(id uint) (*UserTable, *errorUtils.CustomError)
+	CreateUser(input *UserCreate) (*UserTable, *errorUtils.CustomError)
+	UpdateUser(id uint, input *UserUpdate) *errorUtils.CustomError
+	DeleteUser(id uint) *errorUtils.CustomError
 }
 
 type UserRepoInterface interface {
-	GetUsers() ([]*UserTable, error)
-	GetUser(user *UserTable) (*UserTable, error)
-	CreateUser(user *UserTable) (*UserTable, error)
-	UpdateUser(user *UserTable) error
-	DeleteUser(user *UserTable) error
+	GetUsers() ([]*UserTable, *errorUtils.CustomError)
+	GetUser(user *UserTable) (*UserTable, *errorUtils.CustomError)
+	CreateUser(user *UserTable) (*UserTable, *errorUtils.CustomError)
+	UpdateUser(user *UserTable) *errorUtils.CustomError
+	DeleteUser(user *UserTable) *errorUtils.CustomError
 }
 
 type UserCacheRepoInterface interface {

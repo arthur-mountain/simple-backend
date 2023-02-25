@@ -2,6 +2,7 @@ package domain
 
 import (
 	user "simple-backend/internal/domain/user"
+	errorUtils "simple-backend/internal/utils/error"
 )
 
 type LoginBody struct {
@@ -16,12 +17,12 @@ type ResetPasswordBody struct {
 }
 
 type AuthServiceInterface interface {
-	Login(input *LoginBody) (string, error)
-	ForgotPassword(input *LoginBody) error
+	Login(input *LoginBody) (*string, *errorUtils.CustomError)
+	ForgotPassword(input *LoginBody) *errorUtils.CustomError
 }
 
 type AuthRepoInterface interface {
-	GetUser(user *user.UserTable) (*user.UserTable, error)
+	GetUser(user *user.UserTable) (*user.UserTable, *errorUtils.CustomError)
 }
 
 type AuthCacheRepoInterface interface {

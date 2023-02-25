@@ -5,56 +5,44 @@ import (
 	"net/http"
 	"simple-backend/internal/interactor/page"
 	"strconv"
-
-	"github.com/gin-gonic/gin"
 )
 
 type Response struct {
-	StatusCode string      `json:"status_code"`
-	Message    string      `json:"message"`
-	Items      interface{} `json:"items,omitempty"`
+	HttpStatusCode int         `json:"-"`
+	Code           string      `json:"code"`
+	Message        string      `json:"message"`
+	Items          interface{} `json:"items,omitempty"`
 }
 
-type PaginationItems struct {
-	Data interface{} `json:"data"`
-	page.Pagination
+func (r *Response) AppendPagination(pageInfo *page.Pagination) *Response {
+	r.Items = map[string]interface{}{
+		"data":        r.Items,
+		"currentPage": pageInfo.CurrentPage,
+		"perPage":     pageInfo.PerPage,
+		"totalCount":  pageInfo.TotalCount,
+		"totalPage":   int64(math.Abs(float64(pageInfo.TotalCount / pageInfo.PerPage))),
+	}
+
+	return r // return self for easy to put into c.JSON
 }
 
-func MakeCommonResponse(body interface{}, code ...any) Response {
-	if len(code) > 0 {
-		return Response{
-			StatusCode: strconv.Itoa(code[0].(int)),
-			Message:    "success",
-			Items:      body,
-		}
+func MakeCommonResponse(body interface{}, httpStatusCode *int, code *string, message *string) *Response {
+	res := &Response{
+		HttpStatusCode: http.StatusOK,
+		Code:           strconv.Itoa(http.StatusOK),
+		Items:          body,
 	}
 
-	return Response{
-		StatusCode: strconv.Itoa(http.StatusOK),
-		Message:    "success",
-		Items:      body,
+	if httpStatusCode != nil {
+		res.HttpStatusCode = *httpStatusCode
+		res.Code = strconv.Itoa(*httpStatusCode)
 	}
-}
-
-func MakePaginationResponse(body interface{}, pageInfo page.Pagination) Response {
-	items := &PaginationItems{Data: body}
-	items.CurrentPage = pageInfo.CurrentPage
-	items.PerPage = pageInfo.PerPage
-	items.TotalCount = pageInfo.TotalCount
-	items.TotalPage = int64(math.Abs(float64(pageInfo.TotalCount / pageInfo.PerPage)))
-
-	return Response{
-		StatusCode: strconv.Itoa(http.StatusOK),
-		Message:    "success",
-		Items:      items,
+	if code != nil {
+		res.Code = *code
 	}
-}
-
-func MakeErrorResponse(c *gin.Context, code int, err error) {
-	if err != nil {
-		c.JSON(code, Response{StatusCode: strconv.Itoa(code), Message: err.Error()})
-		return
+	if message != nil {
+		res.Message = *message
 	}
 
-	c.JSON(code, Response{StatusCode: strconv.Itoa(code), Message: "something wrong"})
+	return res
 }

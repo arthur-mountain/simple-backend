@@ -3,7 +3,8 @@ package http
 import (
 	model "simple-backend/internal/domain/user"
 	userService "simple-backend/internal/user/service"
-	response "simple-backend/internal/utils/response"
+	errorUtils "simple-backend/internal/utils/error"
+	responseUtils "simple-backend/internal/utils/response"
 	"strconv"
 
 	"simple-backend/internal/utils/databases"
@@ -45,14 +46,14 @@ func UserHandler(server *gin.RouterGroup, DB *gorm.DB, REDIS *databases.MyRedis)
 // @Success      200  {object}  response.Response
 // @Router       /users [get]
 func (a *userController) GetUsers(c *gin.Context) {
-	users, err := a.service.GetUsers()
+	users, customError := a.service.GetUsers()
 
-	if err != nil {
-		response.MakeErrorResponse(c, http.StatusInternalServerError, err)
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
-	c.JSON(http.StatusOK, response.MakeCommonResponse(users))
+	c.JSON(http.StatusOK, responseUtils.MakeCommonResponse(users, nil, nil, nil))
 }
 
 // ShowAccount godoc
@@ -67,18 +68,25 @@ func (a *userController) GetUsers(c *gin.Context) {
 // @Router       /users/{id} [get]
 func (a *userController) GetUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		response.MakeErrorResponse(c, http.StatusBadRequest, err)
+
+	customError := errorUtils.CheckErrAndConvert(
+		err,
+		http.StatusBadRequest,
+		nil,
+		nil,
+	)
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
-	user, err := a.service.GetUser(uint(id))
-	if err != nil {
-		response.MakeErrorResponse(c, http.StatusNotFound, err)
+	user, customError := a.service.GetUser(uint(id))
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
-	c.JSON(http.StatusOK, response.MakeCommonResponse(user))
+	c.JSON(http.StatusOK, responseUtils.MakeCommonResponse(user, nil, nil, nil))
 }
 
 // ShowAccount godoc
@@ -93,8 +101,15 @@ func (a *userController) GetUser(c *gin.Context) {
 // @Router       /users/create [post]
 func (a *userController) CreateUser(c *gin.Context) {
 	var body model.UserCreate
-	if err := c.BindJSON(&body); err != nil {
-		response.MakeErrorResponse(c, http.StatusBadRequest, err)
+
+	customError := errorUtils.CheckErrAndConvert(
+		c.BindJSON(&body),
+		http.StatusBadRequest,
+		nil,
+		nil,
+	)
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
@@ -103,13 +118,14 @@ func (a *userController) CreateUser(c *gin.Context) {
 	// 	return
 	// }
 
-	user, err := a.service.CreateUser(&body)
-	if err != nil {
-		response.MakeErrorResponse(c, http.StatusNotFound, err)
+	user, customError := a.service.CreateUser(&body)
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
-	c.JSON(http.StatusCreated, response.MakeCommonResponse(user, http.StatusCreated))
+	responseCode := http.StatusCreated
+	c.JSON(responseCode, responseUtils.MakeCommonResponse(user, &responseCode, nil, nil))
 }
 
 // ShowAccount godoc
@@ -124,27 +140,39 @@ func (a *userController) CreateUser(c *gin.Context) {
 // @Success      202  {object}  response.Response
 // @Router       /users/{id} [put]
 func (a *userController) UpdateUser(c *gin.Context) {
-	var id int
 	var body model.UserUpdate
-	var err error
 
-	if id, err = strconv.Atoi(c.Param("id")); err != nil {
-		response.MakeErrorResponse(c, http.StatusBadRequest, err)
+	id, err := strconv.Atoi(c.Param("id"))
+	customError := errorUtils.CheckErrAndConvert(
+		err,
+		http.StatusBadRequest,
+		nil,
+		nil,
+	)
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
-	if err = c.BindJSON(&body); err != nil {
-		response.MakeErrorResponse(c, http.StatusBadRequest, err)
+	customError = errorUtils.CheckErrAndConvert(
+		c.BindJSON(&body),
+		http.StatusUnprocessableEntity,
+		nil,
+		nil,
+	)
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
-	err = a.service.UpdateUser(uint(id), &body)
-	if err != nil {
-		response.MakeErrorResponse(c, http.StatusNotFound, err)
+	customError = a.service.UpdateUser(uint(id), &body)
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
-	c.JSON(http.StatusAccepted, response.MakeCommonResponse("update success", http.StatusAccepted))
+	responseCode := http.StatusAccepted
+	c.JSON(responseCode, responseUtils.MakeCommonResponse("update success", &responseCode, nil, nil))
 }
 
 // ShowAccount godoc
@@ -159,16 +187,23 @@ func (a *userController) UpdateUser(c *gin.Context) {
 // @Router       /users/{id} [delete]
 func (a *userController) DeleteUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		response.MakeErrorResponse(c, http.StatusBadRequest, err)
+	customError := errorUtils.CheckErrAndConvert(
+		err,
+		http.StatusBadRequest,
+		nil,
+		nil,
+	)
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
-	err = a.service.DeleteUser(uint(id))
-	if err != nil {
-		response.MakeErrorResponse(c, http.StatusNotFound, err)
+	customError = a.service.DeleteUser(uint(id))
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
-	c.JSON(http.StatusAccepted, response.MakeCommonResponse("delete success", http.StatusAccepted))
+	responseCode := http.StatusAccepted
+	c.JSON(responseCode, responseUtils.MakeCommonResponse("delete success", &responseCode, nil, nil))
 }

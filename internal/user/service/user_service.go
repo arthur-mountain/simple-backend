@@ -6,6 +6,7 @@ import (
 	redisCache "simple-backend/internal/user/repository/redis"
 	authUtils "simple-backend/internal/utils/auth"
 	"simple-backend/internal/utils/databases"
+	errorUtils "simple-backend/internal/utils/error"
 
 	"gorm.io/gorm"
 )
@@ -22,33 +23,26 @@ func Init(db *gorm.DB, redis *databases.MyRedis) model.UserServiceInterface {
 	}
 }
 
-func (a *userService) GetUsers() ([]*model.UserTable, error) {
-	users, err := a.Repository.GetUsers()
-
-	return users, err
+func (a *userService) GetUsers() ([]*model.UserTable, *errorUtils.CustomError) {
+	return a.Repository.GetUsers()
 }
 
-func (a *userService) GetUser(id uint) (*model.UserTable, error) {
-	var err error
+func (a *userService) GetUser(id uint) (*model.UserTable, *errorUtils.CustomError) {
 	user := &model.UserTable{}
 	user.Id = id
 
-	user, err = a.Repository.GetUser(user)
-
-	return user, err
+	return a.Repository.GetUser(user)
 }
 
-func (a *userService) CreateUser(input *model.UserCreate) (*model.UserTable, error) {
-	user, err := a.Repository.CreateUser(&model.UserTable{
+func (a *userService) CreateUser(input *model.UserCreate) (*model.UserTable, *errorUtils.CustomError) {
+	return a.Repository.CreateUser(&model.UserTable{
 		Name:     input.Name,
 		Email:    input.Email,
 		Password: authUtils.GetPasswordHashed(input.Password),
 	})
-
-	return user, err
 }
 
-func (a *userService) UpdateUser(id uint, input *model.UserUpdate) error {
+func (a *userService) UpdateUser(id uint, input *model.UserUpdate) *errorUtils.CustomError {
 	user := model.UserTable{}
 	user.Id = id
 
@@ -66,16 +60,12 @@ func (a *userService) UpdateUser(id uint, input *model.UserUpdate) error {
 		updatedUser.Email = input.Email
 	}
 
-	err = a.Repository.UpdateUser(updatedUser)
-
-	return err
+	return a.Repository.UpdateUser(updatedUser)
 }
 
-func (a *userService) DeleteUser(id uint) error {
+func (a *userService) DeleteUser(id uint) *errorUtils.CustomError {
 	deletedUser := &model.UserTable{}
 	deletedUser.Id = id
 
-	err := a.Repository.DeleteUser(deletedUser)
-
-	return err
+	return a.Repository.DeleteUser(deletedUser)
 }

@@ -7,10 +7,11 @@ import (
 	authService "simple-backend/internal/auth/service"
 	authModel "simple-backend/internal/domain/auth"
 	userModel "simple-backend/internal/domain/user"
-	response "simple-backend/internal/utils/response"
 
 	authUtils "simple-backend/internal/utils/auth"
 	"simple-backend/internal/utils/databases"
+	errorUtils "simple-backend/internal/utils/error"
+	responseUtils "simple-backend/internal/utils/response"
 
 	"net/http"
 
@@ -46,19 +47,20 @@ func AuthHandler(server *gin.RouterGroup, DB *gorm.DB, REDIS *databases.MyRedis)
 // @Router       /system/login [post]
 func (a *authController) LoginHandler(c *gin.Context) {
 	var body authModel.LoginBody
+	customError := errorUtils.CheckErrAndConvert(c.BindJSON(&body), http.StatusUnprocessableEntity, nil, nil)
 
-	if err := c.BindJSON(&body); err != nil {
-		response.MakeErrorResponse(c, http.StatusUnprocessableEntity, err)
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
-	token, err := a.service.Login(&body)
-	if err != nil {
-		response.MakeErrorResponse(c, http.StatusNotFound, err)
+	token, customError := a.service.Login(&body)
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
-	c.JSON(http.StatusOK, response.MakeCommonResponse(map[string]interface{}{"token": token}))
+	c.JSON(http.StatusOK, responseUtils.MakeCommonResponse(map[string]interface{}{"token": token}, nil, nil, nil))
 }
 
 // ShowAccount godoc
@@ -72,26 +74,27 @@ func (a *authController) LoginHandler(c *gin.Context) {
 // @Router       /system/forgot-password [post]
 func (a *authController) ForgotPasswordHandler(c *gin.Context) {
 	data, err := c.GetRawData()
-	if err != nil {
-		response.MakeErrorResponse(c, http.StatusInternalServerError, err)
+
+	customError := errorUtils.CheckErrAndConvert(err, http.StatusInternalServerError, nil, nil)
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
 	var jsonData map[string]interface{}
-	err = json.Unmarshal(data, &jsonData)
-
-	if err != nil {
-		response.MakeErrorResponse(c, http.StatusInternalServerError, err)
+	customError = errorUtils.CheckErrAndConvert(json.Unmarshal(data, &jsonData), http.StatusInternalServerError, nil, nil)
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
 	// find user is exists
-	err = a.service.ForgotPassword(&authModel.LoginBody{
+	customError = a.service.ForgotPassword(&authModel.LoginBody{
 		Email: jsonData["email"].(string),
 	})
 
-	if err != nil {
-		response.MakeErrorResponse(c, http.StatusNotFound, err)
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
@@ -101,7 +104,8 @@ func (a *authController) ForgotPasswordHandler(c *gin.Context) {
 		 2. add api endpoint, verify token, add redis cache and expired, return verify_code
 		 3. reset password body struct should add verify_code
 	*/
-	c.JSON(http.StatusAccepted, response.MakeCommonResponse(os.Getenv("RESET_PASSWORD_URI"), http.StatusAccepted))
+	responseCode := http.StatusAccepted
+	c.JSON(responseCode, responseUtils.MakeCommonResponse(os.Getenv("RESET_PASSWORD_URI"), &responseCode, nil, nil))
 }
 
 func migrateUser(DB *gorm.DB) {

@@ -4,7 +4,8 @@ import (
 	"net/http"
 	model "simple-backend/internal/domain/todo"
 	todoService "simple-backend/internal/todo/service"
-	response "simple-backend/internal/utils/response"
+	errorUtils "simple-backend/internal/utils/error"
+	responseUtils "simple-backend/internal/utils/response"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -56,21 +57,28 @@ func TodoHandler(server *gin.RouterGroup, DB *gorm.DB) {
 func (t *todoController) getAllTodo(c *gin.Context) {
 	field := model.TodoQueries{}
 
-	if err := c.ShouldBindQuery(&field); err != nil {
-		response.MakeErrorResponse(c, http.StatusBadRequest, err)
+	customError := errorUtils.CheckErrAndConvert(
+		c.ShouldBindQuery(&field),
+		http.StatusBadRequest,
+		nil,
+		nil,
+	)
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
 	field.UserId = c.Keys["uid"].(string)
-	totalCount, allTodo, err := t.service.GetAllTodo(&field)
+	totalCount, allTodo, customError := t.service.GetAllTodo(&field)
 
-	if err != nil {
-		response.MakeErrorResponse(c, http.StatusInternalServerError, err)
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
 	field.TotalCount = *totalCount
-	c.JSON(http.StatusOK, response.MakePaginationResponse(allTodo, field.Pagination))
+
+	c.JSON(http.StatusOK, responseUtils.MakeCommonResponse(allTodo, nil, nil, nil).AppendPagination(&field.Pagination))
 }
 
 // ShowAccount godoc
@@ -86,19 +94,25 @@ func (t *todoController) getAllTodo(c *gin.Context) {
 func (t *todoController) getTodo(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 
-	if err != nil {
-		response.MakeErrorResponse(c, http.StatusInternalServerError, err)
+	customError := errorUtils.CheckErrAndConvert(
+		err,
+		http.StatusBadRequest,
+		nil,
+		nil,
+	)
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
-	todo, err := t.service.GetTodo(uint(id), c.Keys["uid"].(string))
+	todo, customError := t.service.GetTodo(uint(id), c.Keys["uid"].(string))
 
-	if err != nil {
-		response.MakeErrorResponse(c, http.StatusNotFound, err)
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
-	c.JSON(http.StatusOK, response.MakeCommonResponse(todo))
+	c.JSON(http.StatusOK, responseUtils.MakeCommonResponse(todo, nil, nil, nil))
 }
 
 // ShowAccount godoc
@@ -113,22 +127,28 @@ func (t *todoController) getTodo(c *gin.Context) {
 // @Router       /todos/create [post]
 func (t *todoController) createTodo(c *gin.Context) {
 	var body model.TodoCreate
-	err := c.BindJSON(&body)
 
-	if err != nil {
-		response.MakeErrorResponse(c, http.StatusUnprocessableEntity, err)
+	customError := errorUtils.CheckErrAndConvert(
+		c.BindJSON(&body),
+		http.StatusBadRequest,
+		nil,
+		nil,
+	)
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
 	body.UserId = c.Keys["uid"].(string)
-	err = t.service.CreateTodo(&body)
+	customError = t.service.CreateTodo(&body)
 
-	if err != nil {
-		response.MakeErrorResponse(c, http.StatusInternalServerError, err)
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
-	c.JSON(http.StatusCreated, response.MakeCommonResponse(body, http.StatusCreated))
+	responseCode := http.StatusCreated
+	c.JSON(responseCode, responseUtils.MakeCommonResponse(body, &responseCode, nil, nil))
 }
 
 // ShowAccount godoc
@@ -143,31 +163,43 @@ func (t *todoController) createTodo(c *gin.Context) {
 // @Success      202    {object}  response.Response
 // @Router       /todos/{id} [put]
 func (t *todoController) updateTodo(c *gin.Context) {
-	var id int
-	var err error
+	id, err := strconv.Atoi(c.Param("id"))
 
-	if id, err = strconv.Atoi(c.Param("id")); err != nil {
-		response.MakeErrorResponse(c, http.StatusUnprocessableEntity, err)
+	customError := errorUtils.CheckErrAndConvert(
+		err,
+		http.StatusUnprocessableEntity,
+		nil,
+		nil,
+	)
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
 	newTodo := new(model.TodoUpdate)
 
-	if err = c.BindJSON(&newTodo); err != nil {
-		response.MakeErrorResponse(c, http.StatusUnprocessableEntity, err)
+	customError = errorUtils.CheckErrAndConvert(
+		c.BindJSON(&newTodo),
+		http.StatusUnprocessableEntity,
+		nil,
+		nil,
+	)
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
 	newTodo.Id = uint(id)
 	newTodo.UserId = c.Keys["uid"].(string)
-	todo, err := t.service.UpdateTodo(newTodo)
+	todo, customError := t.service.UpdateTodo(newTodo)
 
-	if err != nil {
-		response.MakeErrorResponse(c, http.StatusInternalServerError, err)
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
-	c.JSON(http.StatusAccepted, response.MakeCommonResponse(todo, http.StatusAccepted))
+	responseCode := http.StatusAccepted
+	c.JSON(responseCode, responseUtils.MakeCommonResponse(todo, &responseCode, nil, nil))
 }
 
 // ShowAccount godoc
@@ -182,22 +214,30 @@ func (t *todoController) updateTodo(c *gin.Context) {
 // @Router       /todos/{id}/completed [put]
 func (t *todoController) updateTodoCompleted(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		response.MakeErrorResponse(c, http.StatusInternalServerError, err)
+
+	customError := errorUtils.CheckErrAndConvert(
+		err,
+		http.StatusUnprocessableEntity,
+		nil,
+		nil,
+	)
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
-	err = t.service.UpdateTodoCompleted(&model.TodoUpdate{
+	customError = t.service.UpdateTodoCompleted(&model.TodoUpdate{
 		Id:     uint(id),
 		UserId: c.Keys["uid"].(string),
 	})
 
-	if err != nil {
-		response.MakeErrorResponse(c, http.StatusUnprocessableEntity, err)
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
-	c.JSON(http.StatusAccepted, response.MakeCommonResponse(1))
+	responseCode := http.StatusAccepted
+	c.JSON(responseCode, responseUtils.MakeCommonResponse(1, &responseCode, nil, nil))
 }
 
 // ShowAccount godoc
@@ -213,17 +253,24 @@ func (t *todoController) updateTodoCompleted(c *gin.Context) {
 func (t *todoController) deleteTodo(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 
-	if err != nil {
-		response.MakeErrorResponse(c, http.StatusInternalServerError, err)
+	customError := errorUtils.CheckErrAndConvert(
+		err,
+		http.StatusUnprocessableEntity,
+		nil,
+		nil,
+	)
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
-	deletedTodo, err := t.service.DeleteTodo(uint(id), c.Keys["uid"].(string))
+	deletedTodo, customError := t.service.DeleteTodo(uint(id), c.Keys["uid"].(string))
 
-	if err != nil {
-		response.MakeErrorResponse(c, http.StatusUnprocessableEntity, err)
+	if customError != nil {
+		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
-	c.JSON(http.StatusAccepted, response.MakeCommonResponse(deletedTodo, http.StatusAccepted))
+	responseCode := http.StatusAccepted
+	c.JSON(responseCode, responseUtils.MakeCommonResponse(deletedTodo, &responseCode, nil, nil))
 }

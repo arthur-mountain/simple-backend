@@ -22,3 +22,8 @@ USE `simple-backend`;
 -- --   ('title1',  'description1'),
 -- --   ('title2',  'description3'),
 -- --   ('title3',  'description3');
+
+-- user
+-- CREATE TABLE IF NOT EXISTS `user`(
+--
+-- )
