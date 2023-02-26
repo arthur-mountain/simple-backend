@@ -134,6 +134,7 @@ func (a *userController) CreateUser(c *gin.Context) {
 // @Success      202  {object}  response.Response
 // @Router       /users/{id} [put]
 func (a *userController) UpdateUser(c *gin.Context) {
+	var updatedUser *model.UserTable
 	var body model.UserUpdate
 
 	id, err := strconv.Atoi(c.Param("id"))
@@ -155,13 +156,13 @@ func (a *userController) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	customError = a.service.UpdateUser(uint(id), &body)
+	updatedUser, customError = a.service.UpdateUser(uint(id), &body)
 	if customError != nil {
 		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
-	responseUtils.New("update success").SetHttpCode(http.StatusAccepted).Done(c)
+	responseUtils.New(updatedUser).SetMessage("update success").SetHttpCode(http.StatusAccepted).Done(c)
 }
 
 // ShowAccount godoc
@@ -185,11 +186,11 @@ func (a *userController) DeleteUser(c *gin.Context) {
 		return
 	}
 
-	customError = a.service.DeleteUser(uint(id))
+	deletedUser, customError := a.service.DeleteUser(uint(id))
 	if customError != nil {
 		c.JSON(customError.HttpStatusCode, customError)
 		return
 	}
 
-	responseUtils.New("delete success").SetHttpCode(http.StatusAccepted).Done(c)
+	responseUtils.New(deletedUser).SetMessage("delete success").SetHttpCode(http.StatusAccepted).Done(c)
 }

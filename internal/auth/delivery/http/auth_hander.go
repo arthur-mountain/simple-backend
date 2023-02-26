@@ -3,7 +3,7 @@ package http
 import (
 	"encoding/json"
 	"errors"
-	"log"
+	"fmt"
 	"os"
 	authService "simple-backend/internal/auth/service"
 	authModel "simple-backend/internal/domain/auth"
@@ -124,15 +124,14 @@ func (a *authController) ForgotPasswordHandler(c *gin.Context) {
 }
 
 func migrateUser(DB *gorm.DB) {
-	DB.AutoMigrate(&userModel.UserTable{})
+	user := new(userModel.UserTable)
+	DB.AutoMigrate(user)
 
-	user := &userModel.UserTable{
-		Name:     os.Getenv("TEST_USER_NAME"),
-		Email:    os.Getenv("TEST_USER_EMAIL"),
-		Password: authUtils.GetPasswordHashed(os.Getenv("TEST_USER_PASSWORD")),
-	}
+	user.Name = os.Getenv("TEST_USER_NAME")
+	user.Email = os.Getenv("TEST_USER_EMAIL")
+	user.Password = authUtils.GetPasswordHashed(os.Getenv("TEST_USER_PASSWORD"))
 
 	if err := DB.Create(user).Error; err != nil {
-		log.Fatalln("Creat test user failed", err)
+		fmt.Println("Creat test user failed", err)
 	}
 }

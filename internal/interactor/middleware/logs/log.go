@@ -81,7 +81,7 @@ func NewLogger() *logrus.Logger {
 	// open log file
 	file, err := os.OpenFile(fileName, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 	if errors.Is(err, os.ErrNotExist) {
-		fmt.Println("open log file err", err)
+		fmt.Println("open log file err, file is not exists", err)
 	}
 
 	// create logrus instance

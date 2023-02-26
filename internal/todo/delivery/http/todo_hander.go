@@ -23,8 +23,9 @@ func TodoHandler(server *gin.RouterGroup, db *databases.TMysql) {
 	}
 
 	db.Execute(func(DB *gorm.DB) error {
-		if !DB.Migrator().HasTable(&model.TodoTable{}) {
-			DB.AutoMigrate(&model.TodoTable{})
+		table := new(model.TodoTable)
+		if !DB.Migrator().HasTable(table) {
+			DB.AutoMigrate(table)
 		}
 		return nil
 	}, nil)

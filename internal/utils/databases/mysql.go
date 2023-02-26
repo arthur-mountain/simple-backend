@@ -3,6 +3,7 @@ package databases
 import (
 	"errors"
 	"fmt"
+	"os"
 	"time"
 
 	"gorm.io/driver/mysql"
@@ -30,13 +31,18 @@ func MysqlInit(config map[string]interface{}) *TMysql {
 func (t *TMysql) Connect() error {
 	connect, err := gorm.Open(mysql.Open(t.DNS), &gorm.Config{})
 
-	if err != nil { // TODO: logger connect error
+	if err != nil {
 		fmt.Println("Init database error: ", err)
 		return err
 	}
 
 	fmt.Println("Database connected")
-	t.DB = connect
+	if os.Getenv("ENVIRONMENT") == "production" {
+		t.DB = connect
+	} else {
+		t.DB = connect.Debug()
+	}
+
 	return nil
 }
 
@@ -53,7 +59,6 @@ func (t *TMysql) checkDbIsExistsAndReConnect() error {
 	count := t.ReconnectCount
 	for t.Connect() != nil {
 		if count <= 0 {
-			// TODO: may should add logger(reconnect mysql database error)
 			return errors.New("reconnect mysql database error")
 		}
 

@@ -41,9 +41,14 @@ func (t *todoService) CreateTodo(input *model.TodoCreate) *errorUtils.CustomErro
 }
 
 func (t *todoService) UpdateTodo(input *model.TodoUpdate) (*model.TodoTable, *errorUtils.CustomError) {
+	var err *errorUtils.CustomError
 	table := new(model.TodoTable)
 	table.Id = input.Id
 	table.UserId = input.UserId
+
+	if table, err = t.Repository.GetTodo(table); err != nil {
+		return nil, err
+	}
 
 	if input.Title != "" {
 		table.Title = input.Title

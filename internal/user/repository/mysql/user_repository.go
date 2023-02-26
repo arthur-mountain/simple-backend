@@ -25,7 +25,8 @@ func (u *userRepo) GetUsers() ([]*model.UserTable, *errorUtils.CustomError) {
 
 	err := u.db.Execute(func(DB *gorm.DB) error {
 		return DB.Find(&users).Error
-	}, &model.UserTable{})
+	}, users)
+
 	if err != nil {
 		return nil, errorUtils.CheckRepoError(err)
 	}
@@ -34,10 +35,9 @@ func (u *userRepo) GetUsers() ([]*model.UserTable, *errorUtils.CustomError) {
 }
 
 func (u *userRepo) GetUser(user *model.UserTable) (*model.UserTable, *errorUtils.CustomError) {
-
 	err := u.db.Execute(func(DB *gorm.DB) error {
 		return DB.First(user).Error
-	}, &model.UserTable{})
+	}, user)
 
 	if err != nil {
 		return nil, errorUtils.CheckRepoError(err)
@@ -49,7 +49,7 @@ func (u *userRepo) GetUser(user *model.UserTable) (*model.UserTable, *errorUtils
 func (u *userRepo) CreateUser(user *model.UserTable) (*model.UserTable, *errorUtils.CustomError) {
 	err := u.db.Execute(func(DB *gorm.DB) error {
 		return DB.Create(user).Error
-	}, &model.UserTable{})
+	}, user)
 
 	if err != nil {
 		return nil, errorUtils.CheckRepoError(err)
@@ -58,28 +58,26 @@ func (u *userRepo) CreateUser(user *model.UserTable) (*model.UserTable, *errorUt
 	return user, nil
 }
 
-func (u *userRepo) UpdateUser(user *model.UserTable) *errorUtils.CustomError {
+func (u *userRepo) UpdateUser(user *model.UserTable) (*model.UserTable, *errorUtils.CustomError) {
 	err := u.db.Execute(func(DB *gorm.DB) error {
-		return DB.Where("id = ?", user.Id).Updates(user).Error
-	}, &model.UserTable{})
+		return DB.Select("name", "email").Updates(user).Error
+	}, user)
 
-	// TODO: May should return updated user data
 	if err != nil {
-		return errorUtils.CheckRepoError(err)
+		return nil, errorUtils.CheckRepoError(err)
 	}
 
-	return nil
+	return user, nil
 }
 
-func (u *userRepo) DeleteUser(user *model.UserTable) *errorUtils.CustomError {
+func (u *userRepo) DeleteUser(user *model.UserTable) (*model.UserTable, *errorUtils.CustomError) {
 	err := u.db.Execute(func(DB *gorm.DB) error {
 		return DB.First(user).Delete(user).Error
-	}, &model.UserTable{})
+	}, user)
 
-	// TODO: May should return deleted user data
 	if err != nil {
-		return errorUtils.CheckRepoError(err)
+		return nil, errorUtils.CheckRepoError(err)
 	}
 
-	return nil
+	return user, nil
 }

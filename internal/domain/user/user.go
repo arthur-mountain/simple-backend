@@ -54,16 +54,16 @@ type UserServiceInterface interface {
 	GetUsers() ([]*UserTable, *errorUtils.CustomError)
 	GetUser(id uint) (*UserTable, *errorUtils.CustomError)
 	CreateUser(input *UserCreate) (*UserTable, *errorUtils.CustomError)
-	UpdateUser(id uint, input *UserUpdate) *errorUtils.CustomError
-	DeleteUser(id uint) *errorUtils.CustomError
+	UpdateUser(id uint, input *UserUpdate) (*UserTable, *errorUtils.CustomError)
+	DeleteUser(id uint) (*UserTable, *errorUtils.CustomError)
 }
 
 type UserRepoInterface interface {
 	GetUsers() ([]*UserTable, *errorUtils.CustomError)
 	GetUser(user *UserTable) (*UserTable, *errorUtils.CustomError)
 	CreateUser(user *UserTable) (*UserTable, *errorUtils.CustomError)
-	UpdateUser(user *UserTable) *errorUtils.CustomError
-	DeleteUser(user *UserTable) *errorUtils.CustomError
+	UpdateUser(user *UserTable) (*UserTable, *errorUtils.CustomError)
+	DeleteUser(user *UserTable) (*UserTable, *errorUtils.CustomError)
 }
 
 type UserCacheRepoInterface interface {

@@ -40,28 +40,28 @@ func (a *userService) CreateUser(input *model.UserCreate) (*model.UserTable, *er
 	})
 }
 
-func (a *userService) UpdateUser(id uint, input *model.UserUpdate) *errorUtils.CustomError {
-	user := model.UserTable{}
+func (a *userService) UpdateUser(id uint, input *model.UserUpdate) (*model.UserTable, *errorUtils.CustomError) {
+	var err *errorUtils.CustomError
+	user := new(model.UserTable)
 	user.Id = id
 
 	// find user is exists
-	updatedUser, err := a.Repository.GetUser(&user)
-	if err != nil {
-		return err
+	if user, err = a.Repository.GetUser(user); err != nil {
+		return nil, err
 	}
 
 	if input.Name != "" {
-		updatedUser.Name = input.Name
+		user.Name = input.Name
 	}
 
 	if input.Email != "" {
-		updatedUser.Email = input.Email
+		user.Email = input.Email
 	}
 
-	return a.Repository.UpdateUser(updatedUser)
+	return a.Repository.UpdateUser(user)
 }
 
-func (a *userService) DeleteUser(id uint) *errorUtils.CustomError {
+func (a *userService) DeleteUser(id uint) (*model.UserTable, *errorUtils.CustomError) {
 	deletedUser := &model.UserTable{}
 	deletedUser.Id = id
 

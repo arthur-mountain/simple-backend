@@ -21,14 +21,14 @@ func (a *authRepo) WithTx(trx *gorm.DB) authModel.AuthRepoInterface {
 	return &authRepo{db: a.db.WithTrx(trx)}
 }
 
-func (a *authRepo) GetUser(input *userModel.UserTable) (*userModel.UserTable, *errorUtils.CustomError) {
+func (a *authRepo) GetUser(user *userModel.UserTable) (*userModel.UserTable, *errorUtils.CustomError) {
 	err := a.db.Execute(func(DB *gorm.DB) error {
-		return DB.First(input, "email = ?", input.Email).Error
-	}, &userModel.UserTable{})
+		return DB.Where("email = ?", user.Email).First(user).Error
+	}, user)
 
 	if err != nil {
 		return nil, errorUtils.CheckRepoError(err)
 	}
 
-	return input, nil
+	return user, nil
 }

@@ -56,7 +56,7 @@ func (t *todoRepo) GetAllTodo(field *model.TodoQueries) (*int64, []*model.TodoTa
 		}
 
 		return DB.Count(&totalCount).Offset(int((field.CurrentPage - 1) * field.PerPage)).Limit(int(field.PerPage)).Find(&allTodo).Error
-	}, &model.TodoTable{})
+	}, allTodo)
 
 	if err != nil {
 		return nil, nil, errorUtils.CheckRepoError(err)
@@ -68,8 +68,8 @@ func (t *todoRepo) GetAllTodo(field *model.TodoQueries) (*int64, []*model.TodoTa
 func (t *todoRepo) GetTodo(todo *model.TodoTable) (*model.TodoTable, *errorUtils.CustomError) {
 
 	err := t.db.Execute(func(DB *gorm.DB) error {
-		return DB.Where("user_id = ?", todo.UserId).First(&todo, todo.Id).Error
-	}, &model.TodoTable{})
+		return DB.Where("user_id = ?", todo.UserId).First(todo).Error
+	}, todo)
 
 	if err != nil {
 		return nil, errorUtils.CheckRepoError(err)
@@ -80,8 +80,8 @@ func (t *todoRepo) GetTodo(todo *model.TodoTable) (*model.TodoTable, *errorUtils
 
 func (t *todoRepo) CreateTodo(todo *model.TodoTable) *errorUtils.CustomError {
 	err := t.db.Execute(func(DB *gorm.DB) error {
-		return DB.Create(&todo).Error
-	}, &model.TodoTable{})
+		return DB.Create(todo).Error
+	}, todo)
 
 	if err != nil {
 		return errorUtils.CheckRepoError(err)
@@ -94,9 +94,8 @@ func (t *todoRepo) UpdateTodo(newTodo *model.TodoTable) (*model.TodoTable, *erro
 	err := t.db.Execute(func(DB *gorm.DB) error {
 		query := DB.Where("user_id = ?", newTodo.UserId)
 
-		// TODO: Should check todo.Id is exists
-		return query.Select("title", "description").Save(&newTodo).Error
-	}, &model.TodoTable{})
+		return query.Select("title", "description", "is_completed").Updates(newTodo).Error
+	}, newTodo)
 
 	if err != nil {
 		return nil, errorUtils.CheckRepoError(err)
@@ -109,7 +108,7 @@ func (t *todoRepo) UpdateTodoCompleted(updatedTodo *model.TodoTable) *errorUtils
 	err := t.db.Execute(func(DB *gorm.DB) error {
 		query := DB.Where("user_id = ?", updatedTodo.UserId)
 
-		result := query.First(&updatedTodo).Update("is_completed", 1)
+		result := query.First(updatedTodo).Update("is_completed", 1)
 
 		if result.Error != nil {
 			return result.Error
@@ -120,7 +119,7 @@ func (t *todoRepo) UpdateTodoCompleted(updatedTodo *model.TodoTable) *errorUtils
 		}
 
 		return nil
-	}, &model.TodoTable{})
+	}, updatedTodo)
 
 	if err != nil {
 		return errorUtils.CheckRepoError(err)
@@ -133,8 +132,8 @@ func (t *todoRepo) DeleteTodo(deletedTodo *model.TodoTable) (*model.TodoTable, *
 	err := t.db.Execute(func(DB *gorm.DB) error {
 		query := DB.Where("user_id = ?", deletedTodo.UserId)
 
-		return query.First(&deletedTodo).Delete(&deletedTodo).Error
-	}, &model.TodoTable{})
+		return query.First(deletedTodo).Delete(deletedTodo).Error
+	}, deletedTodo)
 
 	if err != nil {
 		return nil, errorUtils.CheckRepoError(err)
