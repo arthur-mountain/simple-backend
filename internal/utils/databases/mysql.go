@@ -45,45 +45,38 @@ func (t *TMysql) WithTrx(trx *gorm.DB) *TMysql {
 	return t
 }
 
-// TODO: If Exec implement, this method whether or not be implemented?
-func (t *TMysql) GetInstance() (*gorm.DB, error) {
-	if t.DB == nil {
-		if err := t.Connect(); err != nil {
-			fmt.Println("reconnect mysql database error")
-			return nil, errors.New("reconnect mysql database error")
+func (t *TMysql) checkDbIsExistsAndReConnect() error {
+	if t.DB != nil {
+		return nil
+	}
+
+	count := t.ReconnectCount
+	for t.Connect() != nil {
+		if count <= 0 {
+			// TODO: may should add logger(reconnect mysql database error)
+			return errors.New("reconnect mysql database error")
 		}
 
-		// reconnectCount := t.ReconnectCount
-		// for reconnectCount > 0 {
-		// 	if err := t.Connect(); err == nil {
-		// 		break
-		// 	}
+		time.Sleep(1 * time.Second)
+		count--
+	}
 
-		// 	time.Sleep(1 * time.Second)
-		// 	reconnectCount--
-		// }
+	return nil
+}
 
-		// if reconnectCount <= 0 {
-		// 	return nil, errors.New("reconnect mysql database error")
-		// }
+// could get instance of db, but better wey is use Execute method
+func (t *TMysql) GetInstance() (*gorm.DB, error) {
+	if err := t.checkDbIsExistsAndReConnect(); err != nil {
+		return nil, err
 	}
 
 	return t.DB, nil
 }
 
-// return bool that means is callback be invoked success
+// return error check callback was invoked success
 func (t *TMysql) Execute(callback func(DB *gorm.DB) error, model interface{}) error {
-	if t.DB == nil {
-		count := t.ReconnectCount
-		for t.Connect() != nil && count > 0 {
-			time.Sleep(1 * time.Second)
-			count--
-		}
-
-		if count <= 0 {
-			// TODO: may should add logger(reconnect mysql database error)
-			return errors.New("reconnect mysql database error")
-		}
+	if err := t.checkDbIsExistsAndReConnect(); err != nil {
+		return err
 	}
 
 	if model != nil && t.DB.Migrator().HasTable(&model) {
