@@ -130,16 +130,19 @@ func CheckRepoError(err error) *CustomError {
 		httpStatusCode = http.StatusNotFound
 	case
 		errors.Is(err, gorm.ErrInvalidData),
-		errors.Is(err, gorm.ErrInvalidField): // unsupported data
+		errors.Is(err, gorm.ErrInvalidField):
+		// unsupported data
 		httpStatusCode = http.StatusUnprocessableEntity
-	case errors.Is(err, gorm.ErrEmptySlice): // empty slice founded
-		httpStatusCode = http.StatusOK
+	case errors.Is(err, gorm.ErrEmptySlice):
+		// empty slice founded
+		httpStatusCode = http.StatusNoContent
 		err = errors.New("empty data was founded")
-	case strings.HasPrefix(err.Error(), "Error "): // TODO: like "Error 1062 duplicate entry", but may should has better way to condition this error
+	case strings.HasPrefix(err.Error(), "Error "):
+		// TODO: like "Error 1062 duplicate entry",
+		// but may should has better way to condition this error
 		httpStatusCode = http.StatusBadRequest
-	default: // TODO: these is server error should logger
-		httpStatusCode = http.StatusInternalServerError
-		err = errors.New("please contact the administrator")
+	default:
+		panic(err) // will be recovered by log middleware
 	}
 
 	return NewCustomError(err, httpStatusCode)
