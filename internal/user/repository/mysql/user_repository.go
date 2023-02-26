@@ -27,7 +27,7 @@ func (u *userRepo) GetUsers() ([]*model.UserTable, *errorUtils.CustomError) {
 		return DB.Find(&users).Error
 	}, &model.UserTable{})
 	if err != nil {
-		return nil, errorUtils.CheckGormError(err)
+		return nil, errorUtils.CheckRepoError(err)
 	}
 
 	return users, nil
@@ -40,7 +40,7 @@ func (u *userRepo) GetUser(user *model.UserTable) (*model.UserTable, *errorUtils
 	}, &model.UserTable{})
 
 	if err != nil {
-		return nil, errorUtils.CheckGormError(err)
+		return nil, errorUtils.CheckRepoError(err)
 	}
 
 	return user, nil
@@ -52,7 +52,7 @@ func (u *userRepo) CreateUser(user *model.UserTable) (*model.UserTable, *errorUt
 	}, &model.UserTable{})
 
 	if err != nil {
-		return nil, errorUtils.CheckGormError(err)
+		return nil, errorUtils.CheckRepoError(err)
 	}
 
 	return user, nil
@@ -65,7 +65,7 @@ func (u *userRepo) UpdateUser(user *model.UserTable) *errorUtils.CustomError {
 
 	// TODO: May should return updated user data
 	if err != nil {
-		return errorUtils.CheckGormError(err)
+		return errorUtils.CheckRepoError(err)
 	}
 
 	return nil
@@ -78,7 +78,7 @@ func (u *userRepo) DeleteUser(user *model.UserTable) *errorUtils.CustomError {
 
 	// TODO: May should return deleted user data
 	if err != nil {
-		return errorUtils.CheckGormError(err)
+		return errorUtils.CheckRepoError(err)
 	}
 
 	return nil

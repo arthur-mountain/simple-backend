@@ -52,9 +52,8 @@ func CheckErrAndConvert(err error, httpStatusCode int) *CustomError {
 
 // Database error, please use in repository, do not use in service or deliver
 // If database changing, only to add new database error check func
-func CheckGormError(err error) *CustomError {
+func CheckRepoError(err error) *CustomError {
 	var httpStatusCode int
-	var message string
 
 	switch {
 	case errors.Is(err, gorm.ErrRecordNotFound):
@@ -65,11 +64,11 @@ func CheckGormError(err error) *CustomError {
 		httpStatusCode = http.StatusUnprocessableEntity
 	case errors.Is(err, gorm.ErrEmptySlice): // empty slice founded
 		httpStatusCode = http.StatusOK
-		message = "empty data was founded"
+		err = errors.New("empty data was founded")
 	default: // TODO: these is server error should logger
 		httpStatusCode = http.StatusExpectationFailed
-		message = "please contact the administrator"
+		err = errors.New("please contact the administrator")
 	}
 
-	return NewCustomError(errors.New(message), httpStatusCode)
+	return NewCustomError(err, httpStatusCode)
 }

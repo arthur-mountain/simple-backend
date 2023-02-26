@@ -27,7 +27,7 @@ func (a *authRepo) GetUser(input *userModel.UserTable) (*userModel.UserTable, *e
 	}, &userModel.UserTable{})
 
 	if err != nil {
-		return nil, errorUtils.CheckGormError(err)
+		return nil, errorUtils.CheckRepoError(err)
 	}
 
 	return input, nil
