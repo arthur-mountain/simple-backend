@@ -75,11 +75,7 @@ func (t *TMysql) GetInstance() (*gorm.DB, error) {
 func (t *TMysql) Execute(callback func(DB *gorm.DB) error, model interface{}) error {
 	if t.DB == nil {
 		count := t.ReconnectCount
-		for count > 0 {
-			if err := t.Connect(); err == nil {
-				break
-			}
-
+		for t.Connect() != nil && count > 0 {
 			time.Sleep(1 * time.Second)
 			count--
 		}
