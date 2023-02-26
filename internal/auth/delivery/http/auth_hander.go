@@ -2,6 +2,7 @@ package http
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"os"
 	authService "simple-backend/internal/auth/service"
@@ -94,9 +95,18 @@ func (a *authController) ForgotPasswordHandler(c *gin.Context) {
 		return
 	}
 
+	email, ok := jsonData["email"]
+	if !ok {
+		customError = errorUtils.NewCustomError(
+			errors.New("could found email field"),
+			http.StatusBadRequest,
+		)
+		c.JSON(customError.HttpStatusCode, customError)
+		return
+	}
 	// find user is exists
 	customError = a.service.ForgotPassword(&authModel.LoginBody{
-		Email: jsonData["email"].(string),
+		Email: email.(string),
 	})
 
 	if customError != nil {

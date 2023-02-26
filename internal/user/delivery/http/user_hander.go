@@ -52,7 +52,7 @@ func (a *userController) GetUsers(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, responseUtils.New(users))
+	responseUtils.New(users).Done(c)
 }
 
 // ShowAccount godoc
@@ -83,7 +83,7 @@ func (a *userController) GetUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, responseUtils.New(user))
+	responseUtils.New(user).Done(c)
 }
 
 // ShowAccount godoc

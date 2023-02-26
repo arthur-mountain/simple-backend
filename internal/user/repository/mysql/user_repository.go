@@ -73,7 +73,7 @@ func (u *userRepo) UpdateUser(user *model.UserTable) *errorUtils.CustomError {
 
 func (u *userRepo) DeleteUser(user *model.UserTable) *errorUtils.CustomError {
 	err := u.db.Execute(func(DB *gorm.DB) error {
-		return DB.Delete(user).Error
+		return DB.First(user).Delete(user).Error
 	}, &model.UserTable{})
 
 	// TODO: May should return deleted user data

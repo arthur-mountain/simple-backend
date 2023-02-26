@@ -75,9 +75,11 @@ func main() {
 	}
 
 	// Apply middleware
-	server.Use(cors.CorsMiddleware)
-	server.Use(statics.StaticsMiddleware)
-	server.Use(logs.LoggerToFile)
+	server.Use(
+		cors.CorsMiddleware(),
+		statics.StaticsMiddleware(),
+		logs.LoggerToFile(),
+	)
 
 	serverV1 := server.Group("api/v1")
 	// Login

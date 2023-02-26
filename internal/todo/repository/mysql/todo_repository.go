@@ -94,6 +94,7 @@ func (t *todoRepo) UpdateTodo(newTodo *model.TodoTable) (*model.TodoTable, *erro
 	err := t.db.Execute(func(DB *gorm.DB) error {
 		query := DB.Where("user_id = ?", newTodo.UserId)
 
+		// TODO: Should check todo.Id is exists
 		return query.Select("title", "description").Save(&newTodo).Error
 	}, &model.TodoTable{})
 

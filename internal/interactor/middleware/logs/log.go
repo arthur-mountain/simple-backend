@@ -1,9 +1,12 @@
 package logs
 
 import (
+	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"path"
+	errorUtils "simple-backend/internal/utils/error"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -55,19 +58,37 @@ func NewLogger() *logrus.Logger {
 	return logger
 }
 
-func LoggerToFile(c *gin.Context) {
-	c.Next()
+func LoggerToFile() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		logger := NewLogger()
+		reqMethod := c.Request.Method
+		reqUri := c.Request.RequestURI
+		statusCode := c.Writer.Status()
+		clientIP := c.ClientIP()
 
-	logger := NewLogger()
-	reqMethod := c.Request.Method
-	reqUri := c.Request.RequestURI
-	statusCode := c.Writer.Status()
-	clientIP := c.ClientIP()
+		defer func() {
+			if err := recover(); err != nil {
+				customError := errorUtils.NewCustomError(
+					errors.New("please contact the administrator"),
+					http.StatusInternalServerError,
+				)
+				logger.Errorf("code:%d | ip:%s | method:%s | uri:%s | message: %s",
+					statusCode,
+					clientIP,
+					reqMethod,
+					reqUri,
+					err,
+				)
+				c.AbortWithStatusJSON(customError.HttpStatusCode, customError)
+			}
+		}()
 
-	logger.Infof("code:%d | ip:%s | method:%s | uri:%s",
-		statusCode,
-		clientIP,
-		reqMethod,
-		reqUri,
-	)
+		c.Next()
+		logger.Infof("code:%d | ip:%s | method:%s | uri:%s",
+			statusCode,
+			clientIP,
+			reqMethod,
+			reqUri,
+		)
+	}
 }

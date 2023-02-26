@@ -4,14 +4,13 @@ import (
 	"math"
 	"net/http"
 	"simple-backend/internal/interactor/page"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Response struct {
 	HttpStatusCode int         `json:"-"`
-	Code           string      `json:"code"`
+	Code           int         `json:"code"`
 	Message        string      `json:"message"`
 	Items          interface{} `json:"items,omitempty"`
 }
@@ -31,7 +30,7 @@ func (r *Response) SetHttpCode(httpCode int) *Response {
 	r.HttpStatusCode = httpCode
 	return r
 }
-func (r *Response) SetCustomCode(code string) *Response {
+func (r *Response) SetCode(code int) *Response {
 	r.Code = code
 	return r
 }
@@ -40,8 +39,8 @@ func (r *Response) SetMessage(message string) *Response {
 	return r
 }
 func (r *Response) Done(c *gin.Context) {
-	if r.Code == "" {
-		r.Code = strconv.Itoa(r.HttpStatusCode)
+	if r.Code == 0 {
+		r.Code = r.HttpStatusCode
 	}
 	c.JSON(r.HttpStatusCode, r)
 }
@@ -49,6 +48,7 @@ func (r *Response) Done(c *gin.Context) {
 func New(body interface{}) *Response {
 	return &Response{
 		HttpStatusCode: http.StatusOK,
+		Message:        "success",
 		Items:          body,
 	}
 }
