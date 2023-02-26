@@ -1,6 +1,7 @@
 version: "3.8"
 
-x-common: &common
+x-common:
+  &common
   networks:
     - backend-network
   restart: unless-stopped
@@ -10,15 +11,20 @@ x-common: &common
 services:
   my-app:
     image: cosmtrek/air
-    container_name: my-app
+    container_name: ${BACKEND_NAME}
     working_dir: /app
     ports:
       - ${BACKEND_PORT}:${BACKEND_PORT}
     environment:
       # backend
       SECRET: ${SECRET}
+      TIMEZONE: ${TIMEZONE}
+      ENVIRONMENT: ${ENVIRONMENT}
       BACKEND_PORT: ${BACKEND_PORT}
       RESET_PASSWORD_URI: ${RESET_PASSWORD_URI}
+      TEST_USER_NAME: ${TEST_USER_NAME}
+      TEST_USER_EMAIL: ${TEST_USER_EMAIL}
+      TEST_USER_PASSWORD: ${TEST_USER_PASSWORD}
       # mysql
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
@@ -30,10 +36,6 @@ services:
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
       REDIS_DB: ${REDIS_DB}
-      # test user
-      TEST_USER_NAME: ${TEST_USER_NAME}
-      TEST_USER_EMAIL: ${TEST_USER_EMAIL}
-      TEST_USER_PASSWORD: ${TEST_USER_PASSWORD}
       # smtp
       SMTP_HOST: ${SMTP_HOST}
       SMTP_PORT: ${SMTP_PORT}
@@ -47,7 +49,7 @@ services:
 
   mysql:
     image: mysql
-    container_name: my-mysql
+    container_name: ${MYSQL_HOST}
     ports:
       - ${MYSQL_PORT}:${MYSQL_PORT}
     volumes:
@@ -61,11 +63,10 @@ services:
 
   redis:
     image: redis
-    container_name: my-redis
+    container_name: ${REDIS_HOST}
     ports:
       - ${REDIS_PORT}:${REDIS_PORT}
     <<: *common
-
   # rebbit:
   #   image: rabbitmq:management
   #   container_name: my-rebbitmq

@@ -2,13 +2,11 @@
 tmp
 
 # Environment variable
-.env
+.env*
+config
 
 # Personal file
-note.txt
-.practice
-architecture-1.jpg
-architecture-2.jpg
+.personal
 
 # Logs file
 /logs
