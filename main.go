@@ -51,8 +51,8 @@ func main() {
 			os.Getenv("MYSQL_USER"),
 			os.Getenv("MYSQL_PASSWORD"),
 			os.Getenv("MYSQL_NETWORK"),
-			os.Getenv("MYSQL_HOST"),
-			os.Getenv("MYSQL_PORT"),
+			os.Getenv("DATABASE_NAME"),
+			os.Getenv("DATABASE_PORT"),
 			os.Getenv("MYSQL_DATABASE"),
 		),
 	})
@@ -62,9 +62,9 @@ func main() {
 
 	// redis init
 	defaultRedisCtx := context.Background()
-	defaultRedisDb, _ := strconv.Atoi(os.Getenv("REDIS_DB"))
+	defaultRedisDb, _ := strconv.Atoi(os.Getenv("CACHE_DATABASE_DEFAULT_DB"))
 	REDIS, err := databases.RedisInit(
-		os.Getenv("REDIS_HOST")+":"+os.Getenv("REDIS_PORT"),
+		os.Getenv("CACHE_DATABASE_NAME")+":"+os.Getenv("CACHE_DATABASE_PORT"),
 		"",
 		defaultRedisDb,
 		defaultRedisCtx,
