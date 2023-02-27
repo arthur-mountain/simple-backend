@@ -106,19 +106,13 @@ func (t *todoRepo) UpdateTodo(newTodo *model.TodoTable) (*model.TodoTable, *erro
 
 func (t *todoRepo) UpdateTodoCompleted(updatedTodo *model.TodoTable) *errorUtils.CustomError {
 	err := t.db.Execute(func(DB *gorm.DB) error {
-		query := DB.Where("user_id = ?", updatedTodo.UserId)
-
-		result := query.First(updatedTodo).Update("is_completed", 1)
+		result := DB.Where("user_id = ?", updatedTodo.UserId).First(updatedTodo)
 
 		if result.Error != nil {
 			return result.Error
 		}
 
-		if result.RowsAffected == 0 {
-			return gorm.ErrRecordNotFound
-		}
-
-		return nil
+		return result.Update("is_completed", 1).Error
 	}, updatedTodo)
 
 	if err != nil {

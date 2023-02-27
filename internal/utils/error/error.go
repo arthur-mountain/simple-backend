@@ -138,8 +138,7 @@ func CheckRepoError(err error) *CustomError {
 		httpStatusCode = http.StatusNoContent
 		err = errors.New("empty data was founded")
 	case strings.HasPrefix(err.Error(), "Error "):
-		// TODO: like "Error 1062 duplicate entry",
-		// but may should has better way to condition this error
+		// like "Error 1062 duplicate entry"
 		httpStatusCode = http.StatusBadRequest
 	default:
 		panic(err) // will be recovered by log middleware

@@ -19,6 +19,7 @@ func Init(db *databases.TMysql) model.TodoServiceInterface {
 	}
 }
 
+// TODO: All method may should check userId is exists?
 func (t *todoService) GetAllTodo(field *model.TodoQueries) (*int64, []*model.TodoTable, *errorUtils.CustomError) {
 	return t.Repository.GetAllTodo(field)
 }
