@@ -3,8 +3,11 @@ package databases
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"time"
+
+	errorUtils "simple-backend/internal/utils/error"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -79,14 +82,20 @@ func (t *TMysql) GetInstance() (*gorm.DB, error) {
 }
 
 // return error check callback was invoked success
-func (t *TMysql) Execute(callback func(DB *gorm.DB) error, model interface{}) error {
-	if err := t.checkDbIsExistsAndReConnect(); err != nil {
-		return err
+func (t *TMysql) Execute(callback func(DB *gorm.DB) error, model interface{}) *errorUtils.CustomError {
+	instance, err := t.GetInstance()
+
+	if err != nil {
+		return errorUtils.NewCustomError(err, http.StatusInternalServerError).SetCode(errorUtils.MySQLConnectError)
 	}
 
-	if model != nil && t.DB.Migrator().HasTable(&model) {
-		return callback(t.DB.Model(&model))
+	if model != nil {
+		instance = instance.Model(&model)
 	}
 
-	return callback(t.DB)
+	if err = callback(instance); err != nil {
+		return errorUtils.CheckRepoError(err)
+	}
+
+	return nil
 }

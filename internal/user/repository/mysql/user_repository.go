@@ -28,7 +28,7 @@ func (u *userRepo) GetUsers() ([]*model.UserTable, *errorUtils.CustomError) {
 	}, users)
 
 	if err != nil {
-		return nil, errorUtils.CheckRepoError(err)
+		return nil, err
 	}
 
 	return users, nil
@@ -40,7 +40,7 @@ func (u *userRepo) GetUser(user *model.UserTable) (*model.UserTable, *errorUtils
 	}, user)
 
 	if err != nil {
-		return nil, errorUtils.CheckRepoError(err)
+		return nil, err
 	}
 
 	return user, nil
@@ -52,7 +52,7 @@ func (u *userRepo) CreateUser(user *model.UserTable) (*model.UserTable, *errorUt
 	}, user)
 
 	if err != nil {
-		return nil, errorUtils.CheckRepoError(err)
+		return nil, err
 	}
 
 	return user, nil
@@ -60,11 +60,11 @@ func (u *userRepo) CreateUser(user *model.UserTable) (*model.UserTable, *errorUt
 
 func (u *userRepo) UpdateUser(user *model.UserTable) (*model.UserTable, *errorUtils.CustomError) {
 	err := u.db.Execute(func(DB *gorm.DB) error {
-		return DB.Select("name", "email").Updates(user).Error
+		return DB.Where("id = ?", user.Id).Select("name", "email").Updates(user).Error
 	}, user)
 
 	if err != nil {
-		return nil, errorUtils.CheckRepoError(err)
+		return nil, err
 	}
 
 	return user, nil
@@ -76,7 +76,7 @@ func (u *userRepo) DeleteUser(user *model.UserTable) (*model.UserTable, *errorUt
 	}, user)
 
 	if err != nil {
-		return nil, errorUtils.CheckRepoError(err)
+		return nil, err
 	}
 
 	return user, nil

@@ -59,7 +59,7 @@ func (t *todoRepo) GetAllTodo(field *model.TodoQueries) (*int64, []*model.TodoTa
 	}, allTodo)
 
 	if err != nil {
-		return nil, nil, errorUtils.CheckRepoError(err)
+		return nil, nil, err
 	}
 
 	return &totalCount, allTodo, nil
@@ -72,7 +72,7 @@ func (t *todoRepo) GetTodo(todo *model.TodoTable) (*model.TodoTable, *errorUtils
 	}, todo)
 
 	if err != nil {
-		return nil, errorUtils.CheckRepoError(err)
+		return nil, err
 	}
 
 	return todo, nil
@@ -83,11 +83,7 @@ func (t *todoRepo) CreateTodo(todo *model.TodoTable) *errorUtils.CustomError {
 		return DB.Create(todo).Error
 	}, todo)
 
-	if err != nil {
-		return errorUtils.CheckRepoError(err)
-	}
-
-	return nil
+	return err
 }
 
 func (t *todoRepo) UpdateTodo(newTodo *model.TodoTable) (*model.TodoTable, *errorUtils.CustomError) {
@@ -98,7 +94,7 @@ func (t *todoRepo) UpdateTodo(newTodo *model.TodoTable) (*model.TodoTable, *erro
 	}, newTodo)
 
 	if err != nil {
-		return nil, errorUtils.CheckRepoError(err)
+		return nil, err
 	}
 
 	return newTodo, nil
@@ -115,11 +111,7 @@ func (t *todoRepo) UpdateTodoCompleted(updatedTodo *model.TodoTable) *errorUtils
 		return result.Update("is_completed", 1).Error
 	}, updatedTodo)
 
-	if err != nil {
-		return errorUtils.CheckRepoError(err)
-	}
-
-	return nil
+	return err
 }
 
 func (t *todoRepo) DeleteTodo(deletedTodo *model.TodoTable) (*model.TodoTable, *errorUtils.CustomError) {
@@ -130,7 +122,7 @@ func (t *todoRepo) DeleteTodo(deletedTodo *model.TodoTable) (*model.TodoTable, *
 	}, deletedTodo)
 
 	if err != nil {
-		return nil, errorUtils.CheckRepoError(err)
+		return nil, err
 	}
 
 	return deletedTodo, nil
