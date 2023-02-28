@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	errorConstants "simple-backend/internal/constants/error"
 	errorUtils "simple-backend/internal/utils/error"
 
 	"gorm.io/driver/mysql"
@@ -86,7 +87,7 @@ func (t *TMysql) Execute(callback func(DB *gorm.DB) error, model interface{}) *e
 	instance, err := t.GetInstance()
 
 	if err != nil {
-		return errorUtils.NewCustomError(err, http.StatusInternalServerError).SetCode(errorUtils.MySQLConnectError)
+		return errorUtils.NewCustomError(err, http.StatusInternalServerError).SetCode(errorConstants.MySQLConnectError)
 	}
 
 	if model != nil {
