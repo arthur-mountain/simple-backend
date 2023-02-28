@@ -171,8 +171,7 @@ func (t *todoController) updateTodo(c *gin.Context) {
 		return
 	}
 
-	newTodo := new(model.TodoUpdate)
-
+	newTodo := model.TodoUpdate{}
 	customError = errorUtils.CheckErrAndConvert(
 		c.BindJSON(&newTodo),
 		http.StatusUnprocessableEntity,
@@ -184,7 +183,7 @@ func (t *todoController) updateTodo(c *gin.Context) {
 
 	newTodo.Id = uint(id)
 	newTodo.UserId = c.Keys["uid"].(string)
-	todo, customError := t.service.UpdateTodo(newTodo)
+	todo, customError := t.service.UpdateTodo(&newTodo)
 
 	if customError != nil {
 		c.JSON(customError.HttpStatusCode, customError)
